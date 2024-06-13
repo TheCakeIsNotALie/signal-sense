@@ -1,4 +1,3 @@
-import tensorflow as tf
 import os
 # Avoid Tensorflow yelling
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -9,29 +8,56 @@ from math import ceil
 from numpy.lib.stride_tricks import sliding_window_view
 import tensorflow as tf
 import itertools
+from keras import backend as K
 
-# def reaggregate_windows_avg(windows, window_size, overlap):
-#     # Determine the step size between windows
-#     step_size = window_size - overlap
+def compute_sample_weights(samples):
+    indices, counts = np.unique(samples, return_counts=True)
+    weight_fn = lambda x: 1/(counts[np.where(indices == x)[0][0]]) * (len(samples)/len(indices)/2)
+    return np.array(list(map(weight_fn, samples)))
+
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(tf.cond(y_pred >= 0.5 and y_true > 0.0, 1, 0)))
+    possible_positives = K.sum(K.round(tf.cond(y_true > 0, 1, 0)))
+    recall = true_positives / (possible_positives)
+    return recall
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(tf.where(y_pred >= 0.5 and y_true > 0.0, 1, 0))
+    predicted_positives = K.sum(tf.where(y_pred >= 0.5, 1, 0))
+    print(true_positives)
+    print(predicted_positives)
+    return true_positives
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
+"""
+Overlap should normally overlap window_size-1
+"""
+def reaggregate_windows_avg(windows, window_size, overlap):
+    # Determine the step size between windows
+    step_size = window_size - overlap
     
-#     # Calculate the length of the final signal
-#     total_length = (len(windows) - 1) * step_size + window_size
+    # Calculate the length of the final signal
+    total_length = (len(windows) - 1) * step_size + window_size
     
-#     # Initialize arrays to accumulate values and counts
-#     accumulated_values = np.zeros(total_length)
-#     count_contributions = np.zeros(total_length)
+    # Initialize arrays to accumulate values and counts
+    accumulated_values = np.zeros(total_length)
+    count_contributions = np.zeros(total_length)
     
-#     # Accumulate values and counts
-#     for i, window in enumerate(windows):
-#         start = i * step_size
-#         end = start + window_size
-#         accumulated_values[start:end] += window
-#         count_contributions[start:end] += 1
+    # Accumulate values and counts
+    for i, window in enumerate(windows):
+        start = i * step_size
+        end = start + window_size
+        accumulated_values[start:end] += window
+        count_contributions[start:end] += 1
     
-#     # Average the accumulated values by counts
-#     reaggregated_signal = accumulated_values / count_contributions
+    # Average the accumulated values by counts
+    reaggregated_signal = accumulated_values / count_contributions
     
-#     return reaggregated_signal
+    return reaggregated_signal
 
 def config_permutations(configs):
     permutations = []
@@ -69,6 +95,7 @@ def calculate_metrics(model, y, y_pred, sample_weight=None):
     # model.compute_loss(x=None, y=y, y_pred=y_pred, sample_weight=sample_weight)
     metrics = model.compute_metrics(x=None, y=y, y_pred=y_pred,
                                     sample_weight=sample_weight)
+
     # convert tensors variable to float
     for k,v in metrics.items():
         metrics[k] = float(v)
