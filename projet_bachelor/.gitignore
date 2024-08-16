@@ -1,0 +1,15 @@
+memoire/*.log
+memoire/*.lot
+memoire/*.lof
+memoire/*.ptc
+memoire/*.aux
+memoire/*.blg
+memoire/*.out
+memoire/*.run.xml
+memoire/*.synctex.gz
+memoire/*.fdb_latexmk
+memoire/*.fls
+memoire/*blx.bib
+memoire/*.bbl
+memoire/*.bcf
+memoire/*SAVE-ERROR

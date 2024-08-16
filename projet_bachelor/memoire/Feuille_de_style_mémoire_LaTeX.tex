@@ -1,0 +1,117 @@
+% !TeX spellcheck = fr_FR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                             %
+%% HEPIA BACHELOR THESIS LATEX TEMPLATE                                        %
+%% version 0.10 - 2020/04/22                                                    %
+%%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage[hyphens]{url}
+\documentclass[12pt
+%% UNCOMMENT THE LINE BELOW TO HAVE CHAPTER STARTING ON THE RIGHT PAGE
+%			,twoside, openright
+			]{report} %% should use memoir documentclass
+\input{config/thesis}
+
+%% To fill up by the student
+\newcommand{\Author}{Yannis Perrin}
+\newcommand{\TitleImage}{template/images/title/title}
+\newcommand{\Title}{Étape de pré-traitement pour télescope via machine learning}
+\newcommand{\Shorttitle}{Machine learning filter}
+\newcommand{\Orientation}{Développement Logiciel}
+\newcommand{\Professor}{Andres Upegui}
+\newcommand{\Client}{UNIGE}
+\newcommand{\Year}{2024}
+\newcommand{\Month}{Août}
+%% THE LINES BELLOW ARE FOR PDF REFERENCING PURPOSES.
+\newcommand{\Keywords}{< Some keywords about your thesis >}
+\newcommand{\Subject}{< Some words about your thesis field >}
+\newcommand{\Convention}{non}
+\newcommand{\Confidentiel}{non}
+
+%% DO NOT MODIFY \hypersetup BELOW. THIS IS FOR PDF REFERENCING PURPOSES.
+\hypersetup{
+	pdftitle={\Title},
+	pdfauthor={\Author},
+	pdfkeywords={\Keywords},
+	pdfsubject={\Subject}
+}
+%\usepackage{showframe}	% Prints document frame
+
+\input{template/header}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT STARTS BELOW %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\pagenumbering{roman}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TITLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{template/title}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% IMAGE TITLE REF %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newgeometry{top=2.1cm,bottom=3.5cm,right=2.5cm,left=2.5cm}
+\begin{spacing}{1.5}
+\input{chapters/titleref}
+\end{spacing}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEDICATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TABLE OF CONTENT %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{spacing}{1}
+\input{chapters/globaltoc}
+\end{spacing}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEDICATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{spacing}{1.5}
+% \input{chapters/dedication}
+%\clearpage
+% \cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ACKNOWLEDGEMENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{chapters/acknowledgements}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ABSTRACT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{chapters/abstract}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIST OF ACRONYMS  %%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{chapters/acronyms}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIST OF FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{chapters/figureslist}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIST OF TABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{chapters/tableslist}
+\end{spacing}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LIST OF ANNEXES %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% COMMENT THIS PART IF YOU DO NOT USE DEDICATED TOC FOR ANNEXES AND COMMENT 
+%%% HEADER AND FOOTER PART IN {chapters/annexes} FILE
+% \begin{spacing}{1}
+% \input{chapters/annexestoc}
+% \end{spacing}
+% %\clearpage
+% \cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTRODUCTION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{spacing}{1.5}
+\pagenumbering{arabic}
+\input{chapters/intro}
+%\clearpage
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHAPTERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add your chapters here %%%%%%%%%%%%%%%%%%%%%%%%%
+%\input{chapters/chapXXX}
+\input{chapters/chap1}
+\input{chapters/chap2}
+\input{chapters/chap3}
+\input{chapters/chap4}
+\input{chapters/conclusion}
+\input{chapters/annexes}
+\input{chapters/references}
+\end{spacing}
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT ENDS HERE %%%%%%%%%%%%%%%%%%%%%%%%%%

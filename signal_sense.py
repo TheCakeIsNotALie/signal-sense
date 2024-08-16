@@ -9,29 +9,103 @@ from numpy.lib.stride_tricks import sliding_window_view
 import tensorflow as tf
 import itertools
 from keras import backend as K
+import keras_tuner
+from matplotlib.pyplot import cm
+import io
+
+threshold = 0.5
 
 def compute_sample_weights(samples):
     indices, counts = np.unique(samples, return_counts=True)
     weight_fn = lambda x: 1/(counts[np.where(indices == x)[0][0]]) * (len(samples)/len(indices)/2)
     return np.array(list(map(weight_fn, samples)))
 
-def recall_m(y_true, y_pred):
-    true_positives = K.sum(K.round(tf.cond(y_pred >= 0.5 and y_true > 0.0, 1, 0)))
-    possible_positives = K.sum(K.round(tf.cond(y_true > 0, 1, 0)))
-    recall = true_positives / (possible_positives)
+def accuracy_m(y_true, y_pred):
+    # Determine the actual positives (values in y_true that are not 0)
+    actual_positives = tf.not_equal(y_true, 0)
+    
+    # Determine the true positives (actual positives where y_pred > 0.5)
+    true_positives = tf.logical_and(actual_positives, y_pred >= threshold)
+    true_negatives = tf.logical_and(tf.logical_not(actual_positives), y_pred < threshold)
+
+    correct_prediction_count = tf.reduce_sum(tf.cast(true_positives, tf.float32)) + tf.reduce_sum(tf.cast(true_negatives, tf.float32))
+
+    return correct_prediction_count / (tf.cast(tf.size(y_true), tf.float32) + tf.keras.backend.epsilon())
+
+def recall_m(y_true, y_pred):    
+    # Determine the actual positives (values in y_true that are not 0)
+    actual_positives = tf.not_equal(y_true, 0)
+    
+    # Determine the true positives (actual positives where y_pred > 0.5)
+    true_positives = tf.logical_and(actual_positives, y_pred >= threshold)
+    predicted_positives = y_pred >= threshold
+    
+    # Count the true positives and actual positives
+    true_positive_count = tf.reduce_sum(tf.cast(true_positives, tf.float32))
+    predicted_positives_count = tf.reduce_sum(tf.cast(predicted_positives, tf.float32))
+    
+    # Calculate recall
+    recall = true_positive_count / (predicted_positives_count + tf.keras.backend.epsilon())
+    
     return recall
 
 def precision_m(y_true, y_pred):
-    true_positives = K.sum(tf.where(y_pred >= 0.5 and y_true > 0.0, 1, 0))
-    predicted_positives = K.sum(tf.where(y_pred >= 0.5, 1, 0))
-    print(true_positives)
-    print(predicted_positives)
-    return true_positives
+    # Determine the possible positives (values in y_true that are not 0)
+    positives = tf.not_equal(y_true, 0)
+    
+    # Determine the true positives (possible positives where y_pred > 0.5)
+    true_positives = tf.logical_and(positives, y_pred >= threshold)
+    
+    # Count the true positives and possible positives
+    true_positive_count = tf.reduce_sum(tf.cast(true_positives, tf.float32))
+    positive_count = tf.reduce_sum(tf.cast(positives, tf.float32))
+    
+    # Calculate precision
+    precision = true_positive_count / (positive_count + tf.keras.backend.epsilon())
+    
+    return precision
 
 def f1_m(y_true, y_pred):
     precision = precision_m(y_true, y_pred)
     recall = recall_m(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
+def test_custom_metrics():
+    # Custom metrics test
+    # 5 positives, 6 negatives
+    expected_results = tf.constant([[0,1,2,0,4,2,1,0,0,0,0]])
+    # 3 true positives, 1 false positive, 2 false negatives, 5 true negatives
+    # 11 total
+    predictions = tf.constant([[0.1, 0.6, 0.2, 0.01, 0.7, 1, 0.4, 0.0, 0.1, 0.3, 2]])
+    
+    print(f"Expected results : ")
+    print(f"\tAccuracy : 0.72, {accuracy_m(expected_results, predictions)}")
+    print(f"\tPrecision : 0.6, {precision_m(expected_results, predictions)}")
+    print(f"\tRecall : 3/4 - {recall_m(expected_results, predictions)}")
+    print(f"\tF1 : 0.666 - {f1_m(expected_results, predictions)}")
+
+def build_cnn_model(hp: keras_tuner.HyperParameters, window_size):
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.InputLayer(input_shape=(window_size, 1)),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv1D(5, 
+                                   hp.Int("kernel_size", min_value=5, max_value=window_size, step=2), 
+                                   activation=hp.Choice("activation",["sigmoid", "relu", "tanh"])
+                                   ),
+            tf.keras.layers.MaxPooling1D(),
+            tf.keras.layers.Dropout(0.4),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(window_size, activation='relu'),
+        ]
+    )
+    adam_optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+    model.compile(optimizer=adam_optimizer,
+              loss='mse',
+              metrics=[precision_m, recall_m, f1_m])
+    
+    return model
+
 
 """
 Overlap should normally overlap window_size-1
@@ -58,6 +132,23 @@ def reaggregate_windows_avg(windows, window_size, overlap):
     reaggregated_signal = accumulated_values / count_contributions
     
     return reaggregated_signal
+
+def get_colormap(values):
+    color = iter(cm.rainbow(np.linspace(0, 1, len(values))))
+    colormap = {}
+    for i in range(len(values)):
+        colormap[str(values[i])] = next(color)
+        
+    return colormap
+
+# Function to capture model summary as a string
+def get_model_summary(model):
+    stream = io.StringIO()
+    model.summary(print_fn=lambda x: stream.write(x + '\n'))
+    summary_string = stream.getvalue()
+    stream.close()
+    return summary_string
+
 
 def config_permutations(configs):
     permutations = []
@@ -102,12 +193,7 @@ def calculate_metrics(model, y, y_pred, sample_weight=None):
         
     return metrics
 
-def run_tests(model : tf.keras.Model, window_size: int):
-    configs = {
-        "pe_rate_mhz": [20,50,64,150], # 1 to 150 MHz [20,32,50,64,128,150]
-        "noise_lsb": np.arange(0, 1.5, 0.25), # 0 to 1.5 noise
-    }
-    
+def run_tests(model : tf.keras.Model, configs: dict,  window_size: int):
     metrics_result = []
     
     # static generator settings
@@ -162,3 +248,6 @@ def run_tests(model : tf.keras.Model, window_size: int):
         # print(f"RES_{i}: {metrics}")
     
     return metrics_result
+
+if __name__ == "__main__":
+    test_custom_metrics()

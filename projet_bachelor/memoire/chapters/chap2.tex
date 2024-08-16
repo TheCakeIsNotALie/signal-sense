@@ -1,0 +1,135 @@
+% !TeX spellcheck = fr_FR
+\chapter{Chapitre 2 : Historique du projet}
+
+\section{Projet initial}
+
+En novembre 2023, l'\gls{unige} a proposé ce projet de recherche à l'\gls{hepia}, spécifiquement dans le cadre du projet du télescope spatial Terzina. 
+Le but initial de ce projet était de créer un modèle de machine learning permettant d'aider à la décision d'événements scientifiquement intéressant 
+détecté par le télescope afin de réduire la quantité d'informations a transmettre au sol. 
+Le télescope Terzina est prévu d'être lancé à bord du satellite NUSES.
+
+\subsection{NUSES}
+Le projet \textbf{NeUtrino and Seismic Electromagnetic Signals} est une mission spatiale pionnière qui 
+a vu le jour via la collaboration entre différentes universités et organisations gouvernementales. \cite{Nuses}
+Notamment l'\gls{unige}, l'\gls{infn} et la NASA.
+Son but est d'envoyer un satellite dans l'espace, avec deux instruments scientifiques à bord, Zirè et Terzina, qui mènerons 
+des expériences une fois en orbite.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{nuses.png}
+	\caption[Mission NUSES]{Mission NUSES. Source: \cite{Nuses}}
+\end{figure}
+
+\textbf{Zirè} a pour but d'observer le rayonnement cosmique \gls{le} (<250 MeV) pour étudier de plus près la ceinture de Van Allen,
+la météo spatiale et les interactions entre les lithosphère, ionosphère et magnétosphère.
+
+\textbf{Terzina} a pour but de tester de manière concrète les technologies qui pourraient être utilisées pour étudier des rayonnements cosmiques
+\gls{uhe} > 100PeV et de détecter des neutrinos via les pluies atmosphériques de lumière Cherenkov qu'ils produisent.
+
+%comparaison with the Japanese detector in mountains ?
+
+Le satellite sera placé en orbite terrestre basse de manière héliosynchrone.
+L'orbite terrestre basse ou \gls{leo} est définie comme toutes les orbites plus proches que 1000km au dessus de la surface de la terre.\cite{LowEarthOrbit}
+L'orbite héliosynchrone est une orbite presque polaire (naviguant du nord au sud ou inversement) où le satellite 
+passe au dessus d'un même point à la même heure solaire. Cela implique que son orientation en rapport au soleil reste la même.
+
+Pour Terzina, cela permet aux capteurs d'être toujours pointés en direction opposée au soleil pour éviter au maximum les rayons gamma qu'il émet.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{heliosynchrone.png}
+	\caption[Orbite héliosynchrone de Terzina]{Orbite héliosynchrone de Terzina. Source: \cite{Nuses}}
+\end{figure}
+
+\subsection{Terzina}
+Comparé aux autres satellites qui ont étudiés des rayons gamma en orbite, Terzina est prévu d'être le premier télescope spatial
+qui détectera la lumière Cherenkov depuis l'espace. De plus, il permettra aussi d'étudier les performances de nouveaux capteurs \gls{sipm}
+dans l'espace. Ceux-ci devraient détecter plus de photons et être plus robustes que leur contrepartie classique bien que ces nouveaux capteurs
+soient plus sensible aux bruits de fond et à l'irradiation abondante hors de notre atmosphère.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{terzina_mirrors.png}
+	\caption[Vue de la configuration optique de Terzina]
+	{En bleu les miroirs, en blanc la lentille, en orange la caméra et en violet les murs \textbf{Gauche :} Vue de dessus. \textbf{Droite :} Vue de côté. Source: \cite{Burmistrov_2023} p.2}
+\end{figure}
+
+Le télescope utilise une configuration à deux miroirs qui redirigent et concentrent les photons reçus sur une matrice 
+rectangulaire de 10 modules \gls{sipm}, eux-mêmes possédant une résolution de 8x8 pixels, 640 pixels au total. \cite{Burmistrov_2023}
+
+Cette forme rectangulaire a été décidée pour observer le limbe terrestre de manière optimale et elle est capable de détecter une coupe transversale de 140 x 360 $km^2$.
+Derrière les 10 modules \gls{sipm}, il est prévu 10 \gls{asic} chacun possédant 64 canaux pour chacun des tubes photomultiplicateurs de la caméra.
+Ces \gls{asic} sont conçus pour amplifier le signal de sortie puis le numériser avant d'être collectés par un \gls{fpga} à bord du satellite. 
+
+En plus de leur rôle de numérisation, les \gls{asic} ont aussi le rôle de déclencheur matériel. 
+Ce rôle est important pour que le signal analogue des photomultiplicateurs ne soit converti en signal numérique que si nécessaire. 
+
+Le premier mécanisme de déclanchement, nommé "haut", arrive lorsque un pic d'énergie dépasse un seuil "haut" dans un seul canal
+d'un module \gls{sipm}; chaque canal du module est numérisé et collecté par le \gls{fpga}. 
+
+Le deuxième mécanisme de déclanchement "bas" arrive lorsque deux pixels adjacents d'un même module \gls{sipm}
+dépassent ce seuil ou lorsque c'est l'un des 8 pixels voisins d'un autre module. 
+Ensuite, les pixels voisins sont analysés pour déterminer si au moins deux d'entre eux ont aussi dépassé ce seuil "bas"; dans ce cas l'\gls{fpga} va conserver cet évènement.
+Tous ces tests se déroulent dans un laps de temps très court; de la numérisation du signal au traitement et stockage sur le \gls{fpga}, il se passerait environ 51.2$\mu$s
+
+\section{Proposition de projet par l'UNIGE}
+
+La quantité de données récoltées par Terzina se révèle être trop grande pour être envoyée au sol, même après ces déclancheurs intégrés au matériel.
+En effet la capacité de bande passante du satelitte est limitée à 40Gbit par jour en transmission et seulement quelques Kbit par jour en réception.
+Ceci est dû à la configuration du satellite et est en plus partagée entre Zirè et Terzina.
+
+C'est à ce moment de la conception que l'UNIGE à imaginer rajouter un réseau de neurones à bord du \gls{fpga}, capable de filtrer
+le bruit de chaque pixel pour n'en garder que l'onde connue des photons de pluies atmosphériques. 
+Avec ce signal filtré, une décision d'envoyer ou non l'évènement au sol serait plus simple. 
+Ils ont donc proposer ce projet à l'\gls{hepia} et j'ai été choisi pour travailler sur celui-ci comme projet de semestre.
+
+Les ressources à bord du satellite étant coûteuses, le modèle étais conçu pour être le plus petit possible 
+afin d'utiliser le moins de place et de puissance de calcul.
+Il est prévu d'utiliser un modèle Keras pour le réseau de neurones, car il existe déjà des moyens de l'exporter vers des \gls{fpga}.
+Le fait de déployer le modèle de réseau de neurones ne faisait pas partie intégrante de ce travail de semestre mais impliquait une
+restriction technique car la programmation du \gls{fpga} n'aurait été possible qu'avant le lancement.
+
+En plus de cette utilisation en tant que filtre, il a été théorisé avec l'équipe de l'\gls{unige} que le réseau de neurones
+pourrait aussi compenser l'usure/l'irradiation des capteurs. Ceci pourrait être fait par un ajustement en vol des poids du réseau de neurones 
+ou implicitement par l'architecture du modèle directement.
+
+\section{Délais de production}
+
+Malheureusement, en mars 2023, l'équipe s'occupant du développement des \gls{asic} à annoncé des retards de production conséquents ne permettant pas de les installer sur Terzina.
+Il a donc été décidé de remplacer ces \gls{asic} par un modèle déjà existant : CITIROC. Cependant, ces nouveaux \gls{asic} ne sont pas capables 
+de transmettre un signal comme les \gls{asic} prévus jusqu'à présent et ne donnent que des informations sur le pic d'intensité atteint sur la durée d'échantillonage.
+
+% TODO numeric waveform signal vs Peak and time diagram
+
+Ce changement de matériel modifie les données en sortie du capteur, ne produisant plus de signal numérisé et rendant donc la capabilité d'un réseau de neurones
+difficile voir impossible.
+
+\section{Adaptation du projet}
+
+En voyant que l'ajout du réseau de neurones sur le \gls{fpga} du télescope n'est plus possible, l'\gls{unige} propose alors de continuer 
+ce projet de recherche mais pour utilisation sur des télescopes au sol. L'équipe de l'\gls{unige} participe aussi au groupe \gls{ctao}
+qui a, comme évoqué précédemment, le but de créer deux observatoires avec 3 types de télescopes différents.
+
+Le réseau de neurones imaginé pour Terzina se révèlerait aussi utile pour ces télescopes.
+Les télescopes standard ne présentent pas les mêmes contraintes que la légèreté et simplicité que Terzina doit respecté pour arriver en orbite.
+Sans ces contraintes, le \gls{lst} atteint une résolution de 1855 pixels et une fréquence d'acquisition de 1GHz. 
+Cette configuration, collecte 24Gbit de données par secondes avant des systèmes de déclancheurs matériel. \cite{LSTSpecifications}
+
+L'ajout d'un réseau de neurones capable de réduire le bruit et d'estimer le nombre de photons détecté par pixel serait donc très utile comme point de décision supplémentaire
+pour garder ou non les diférents évènements déclanchés afin de réduire les ressources utilisées pour le stockage et le traitement de ces données.
+
+De plus, il a été théorisé que le filtrage et l'estimation du nombre de photons que le réseau de neurones apporterait, puisse améliorer 
+le traitement des données en aval. Notamment une possible amélioration de la résolution angulaire (d'où provient la pluie de lumière Cherenkov) et une possible amélioration de
+la sensibilité du télescope aux évènements moins énergétiques.
+
+% \subsection{CTLearn}
+%TODO what is CTLearn the goals and why this project would be useful
+
+% \subsubsection{Data levels}
+%TODO where the actual project lies and will be inserted
+
+%TODO ASICs on ground
+
+% \subsubsection{Different impulses shape per telescopes}
+%TODO LST model will not work for SST-1M
