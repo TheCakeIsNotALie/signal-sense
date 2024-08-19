@@ -75,24 +75,24 @@ Tous ces tests se déroulent dans un laps de temps très court; de la numérisat
 
 \section{Proposition de projet par l'UNIGE}
 
-La quantité de données récoltées par Terzina se révèle être trop grande pour être envoyée au sol, même après ces déclancheurs intégrés au matériel.
-En effet la capacité de bande passante du satelitte est limitée à 40Gbit par jour en transmission et seulement quelques Kbit par jour en réception.
-Ceci est dû à la configuration du satellite et est en plus partagée entre Zirè et Terzina.
+La quantité de données récoltées par Terzina se révèle être trop importante pour être envoyée au sol, même après l'activation des déclancheurs intégrés au matériel.
+En effet, la capacité de bande passante de Terzina est limitée à 40Gbit par jour en transmission et seulement quelques Kbit par jour en réception.
+Ceci est dû à la configuration du satellite NUSES qui est aussi partagé entre les deux instruments Zirè et Terzina.
 
-C'est à ce moment de la conception que l'UNIGE à imaginer rajouter un réseau de neurones à bord du \gls{fpga}, capable de filtrer
-le bruit de chaque pixel pour n'en garder que l'onde connue des photons de pluies atmosphériques. 
-Avec ce signal filtré, une décision d'envoyer ou non l'évènement au sol serait plus simple. 
-Ils ont donc proposer ce projet à l'\gls{hepia} et j'ai été choisi pour travailler sur celui-ci comme projet de semestre.
+C'est à ce moment de la conception que l'UNIGE a eu l'idée d'ajouter un réseau de neurones à bord du \gls{fpga}, capable de filtrer
+le bruit de chaque pixel pour n'en garder que les photons de pluies atmosphériques. 
+Avec ce signal filtré, la décision d'envoyer ou non l'événement au sol serait plus simple. 
+Ils ont donc proposé ce projet à l'\gls{hepia} et j'ai été choisi pour travailler dessus comme projet de semestre.
 
-Les ressources à bord du satellite étant coûteuses, le modèle étais conçu pour être le plus petit possible 
+Les ressources à bord du satellite étant coûteuses, le modèle avait comme contrainte d'être le plus petit possible 
 afin d'utiliser le moins de place et de puissance de calcul.
 Il est prévu d'utiliser un modèle Keras pour le réseau de neurones, car il existe déjà des moyens de l'exporter vers des \gls{fpga}.
-Le fait de déployer le modèle de réseau de neurones ne faisait pas partie intégrante de ce travail de semestre mais impliquait une
+Le déploiement du modèle de réseau de neurones ne faisait pas partie intégrante de ce travail de semestre mais impliquait une
 restriction technique car la programmation du \gls{fpga} n'aurait été possible qu'avant le lancement.
 
-En plus de cette utilisation en tant que filtre, il a été théorisé avec l'équipe de l'\gls{unige} que le réseau de neurones
-pourrait aussi compenser l'usure/l'irradiation des capteurs. Ceci pourrait être fait par un ajustement en vol des poids du réseau de neurones 
-ou implicitement par l'architecture du modèle directement.
+En plus de cette utilisation en tant que filtre, l'équipe de l'\gls{unige} a théorisé l'idée que le réseau de neurones
+pourrait aussi compenser l'usure et l'irradiation des capteurs au fil du temps. Cette compensation pourrait se faire par un ajustement en vol 
+des poids du réseau de neurones ou implicitement par l'architecture et l'entraînement du modèle directement.
 
 \section{Délais de production}
 
@@ -107,29 +107,63 @@ difficile voir impossible.
 
 \section{Adaptation du projet}
 
-En voyant que l'ajout du réseau de neurones sur le \gls{fpga} du télescope n'est plus possible, l'\gls{unige} propose alors de continuer 
-ce projet de recherche mais pour utilisation sur des télescopes au sol. L'équipe de l'\gls{unige} participe aussi au groupe \gls{ctao}
-qui a, comme évoqué précédemment, le but de créer deux observatoires avec 3 types de télescopes différents.
+Voyant que l'ajout du réseau de neurones sur le \gls{fpga} du télescope n'est plus possible, l'\gls{unige} propose alors de poursuivre 
+ce projet de recherche mais pour utilisation sur des télescopes au sol. L'équipe de l'\gls{unige} participe également au groupe \gls{ctao}
+qui a pour but de créer deux observatoires dotés de trois types de télescopes différents.
 
-Le réseau de neurones imaginé pour Terzina se révèlerait aussi utile pour ces télescopes.
-Les télescopes standard ne présentent pas les mêmes contraintes que la légèreté et simplicité que Terzina doit respecté pour arriver en orbite.
-Sans ces contraintes, le \gls{lst} atteint une résolution de 1855 pixels et une fréquence d'acquisition de 1GHz. 
-Cette configuration, collecte 24Gbit de données par secondes avant des systèmes de déclancheurs matériel. \cite{LSTSpecifications}
+Le réseau de neurones imaginé pour Terzina serait aussi utile pour ces télescopes.
+Les télescopes standard ne présentent pas les mêmes contraintes que la légèreté et la simplicité que Terzina doit respecter pour arriver en orbite.
+Sans ces contraintes, le \gls{lst} atteint une résolution de $1'855$ pixels et une fréquence d'acquisition de $1 GHz$. 
+Cette configuration, collecte $24 Gbit$ de données par seconde avant les systèmes de déclancheurs matériels. \cite{LSTSpecifications}
+De plus, la nouvelle génération de caméra sur laquelle l'\gls{unige} travaille, augmentera même la résolution jusqu'à $~8'000$ pixels.
 
-L'ajout d'un réseau de neurones capable de réduire le bruit et d'estimer le nombre de photons détecté par pixel serait donc très utile comme point de décision supplémentaire
-pour garder ou non les diférents évènements déclanchés afin de réduire les ressources utilisées pour le stockage et le traitement de ces données.
+L'ajout d'un réseau de neurones capable de réduire le bruit et d'estimer le nombre de photons détectés par pixel serait donc très utile en tant que 
+point de décision supplémentaire pour garder ou non les diférents événements déclanchés afin de réduire les ressources utilisées pour le stockage 
+et le traitement de ces données.
 
-De plus, il a été théorisé que le filtrage et l'estimation du nombre de photons que le réseau de neurones apporterait, puisse améliorer 
-le traitement des données en aval. Notamment une possible amélioration de la résolution angulaire (d'où provient la pluie de lumière Cherenkov) et une possible amélioration de
+De plus, il a été théorisé que le filtrage et l'estimation du nombre de photons que le réseau de neurones apporterait, puissent améliorer 
+le traitement des données en aval. Cela pourrait notamment améliorer la résolution angulaire (d'où provient la pluie de lumière Cherenkov) et une possible amélioration de
 la sensibilité du télescope aux évènements moins énergétiques.
 
-% \subsection{CTLearn}
-%TODO what is CTLearn the goals and why this project would be useful
+Pour tester l'amélioration de ces performances, il est prévu d'insérer ce réseau neuronal en tant qu'étape de pré-traitement des données
+au pour chaque pixel avant de les transmettre à un logiciel de classification et d'analyse des pluies Cherenkov : CTLearn.
 
-% \subsubsection{Data levels}
-%TODO where the actual project lies and will be inserted
+Mais pour sa possible utilisation finale, ce réseau pourrait aussi être programmé dans des \gls{asic} ou \gls{fpga} qui seraient intégrés dans les différents télescopes au sol.
 
-%TODO ASICs on ground
+\subsection{CTLearn}
+Cet outil, développé en coordination entre l'université de genève et de Madrid, permet d'analyser des pluies Cherenkov détectées 
+par les télescopes du \gls{ctao}. CTLearn va alors, pour chaque pluie essayer d'en déterminer son type : hadronique ou électromangnétique, 
+sa provenance dans le ciel et effectuer des analyses sur l'énergie totale de cet évènement.
+Ces différentes informations sont ensuites utilisées par d'autres projets pour calculer d'autres valeurs d'intérêts scientifiques.
 
-% \subsubsection{Different impulses shape per telescopes}
-%TODO LST model will not work for SST-1M
+\subsubsection{Data levels}
+Pour faciliter la communication et les échanges entre les nombreuses équipes travaillant pour le \gls{ctao}, 
+plusieurs niveaux de données ont été élaborés.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{CTADataLevels.png}
+	\caption[Flux des données CTAO]{Flux des données CTAO. Source: \cite{CTAOComputingChallenges}, page 5}
+\end{figure}
+
+\begin{itemize}
+	\item MC0 : Données créées par des simulateurs Monte-Carlo
+	\item DL0 : Données réelles récupérées par les télescopes.
+	\item DL1 : Images calibrées et nétoyées (par télescope/pluie Cherenkov)
+	\item DL2 : Reconstruction de la pluie selon les images récupérées et prédiction de type hadronique/électromagnétique
+	\item DL3 : Qualification et dicrimination des pluies
+	\item DL4 : Analyse des données de haut-niveau (spectres du ciel complet, etc.)
+	\item DL5 : Aggrégation des données pour en créer des catalogues en tirer des conclusions scientifiques.
+\end{itemize}
+
+\subsubsection{Flux logiciel}
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{CTLearnWorkflow.png}
+	\caption[Flux du logiciel CTLearn]{Flux du logiciel CTLearn. Source: \cite{CTLearnWorkflow}}
+\end{figure}
+
+Les données utilisées par CTLearn sont les signaux numérisées de chaque capteur composant la caméra d'un télescope, données de niveau DL1.
+Ces données sont récupérées via les outils CTAPipe et DL1-Data-Handler. 
+Ce projet de bachelor résiderait donc entre DL1-Data-Handler et CTLearn ou serait intégré à l'un d'entre eux comme étape de pré-traitement des signaux individuels.

@@ -1,13 +1,14 @@
 % !TeX spellcheck = fr_FR
 \chapter{Chapitre 3 : Méthodologie}
 
-\section{Machine learning}
-
-Tout d'abord revennons sur les technologies de bases sur lequel ce projet se porte. 
 Dans ce projet, nous avons essayer de créer un programme capable d'analyser un signal temporel et 
 d'en estimer la présence et la quantité de photons présent dans ce signal.
 
 Pour cela, nous avons utilisés différents types de réseaux neuronaux qui sont eux-mêmes une technique de machine learning.
+Ce chapitre se porte donc sur le fonctionnement des technologies et outils utilisés pour ce projet. 
+
+\section{Machine learning}
+
 Le machine learning peut-être n'importe quel forme de programme ou système capable d'apprendre ou d'améliorer ses performances
 en fonction des données qu'il traite.
 
@@ -21,28 +22,32 @@ Ce modèle va alors lui même essayer de trouver une manière de classifier ou d
 
 Dans le cadre de ce projet, l'équipe de l'\gls{unige} nous a fournis des données provenant de simulations des capteurs conçus pour les différents télescopes analysés.
 Lors de la création de ces simulations, les méta-données des photons simulés a aussi été sauvegardée, ce qui nous donne accès
-à la "vérité" de la quantité et à quel moment les photons ont été détectés. 
-Formalisant le but du projet comme : la recherche d'une architecture de réseau de neurones avec un apprentissage supervisée.
+à la "vérité" du moment exact ou chaque photon a été détecté. 
+Formalisant le corp du projet comme une recherche d'architecture de réseau neuronal avec un apprentissage supervisée.
 
 \section{Réseaux neuronaux}
 
-Maintenant parlons de ce qu'est un réseau de neurones ou réseau neuronal.
+Alors qu'est-ce qu'un réseau de neurones ou réseau neuronal exactement ?
 Comme vu précédemment, c'est un modèle de machine learning qui est inspiré par le fonctionnement d'un cerveau humain.
 
-%TODO insert neural network image here
-
 Cette technique utilise des noeuds (neurones artificiels) interconnectés entre eux, créant ainsi des couches similiares à nos cerveaux.
-Chaque noeud ou neurone peut être ou non connecté à un ou plusieurs suivants laissant une infinité d'interconnexions, 
-cela peut aussi être surnommer comme l'architecture du réseau.
+Chaque noeud peut être ou non connecté à un ou plusieurs neurones supplémentaires créant une infinité de configuration possible.
+La configuration d'un réseau de neurones est aussi surnommée comme l'architecture du réseau.
 
 \subsection{Les perceptrons}
 
-Le fonctionnement d'un neurone standard suis le fonctionnement suivant :
+Chacun des noeuds qui composent un réseaux de neurones fonctionne comme une fonction mathématique, prennant des valuers d'entrée et une valeur de sortie.
+Ces neurones sont aussi appelé perceptron. Et suivent en général le fonctionnement suivant :
 
-% TODO perceptron image
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{perceptron.png}
+	\caption[Illustration d'un perceptron]{Illustration d'un perceptron. Source : \cite{PerceptronImage}}
+\end{figure}
 
-Celui-ci prend en entrée : un bias, et x données avec des poids associés. Toutes ces valeurs biasées sont ensuite additionnées ensemble
-et passées à une fonction d'activation qui donnera une valeur de sortie au perceptron. 
+Les paramètres d'un perceptron sont : un bias, et $x$ données d'entrées avec des poids associés. Toutes ces valeurs pondérées sont ensuite additionnées ensemble
+et passées à une fonction d'activation qui donnera la valeur finale de sortie au perceptron. En général la fonction d'activation est une sigmoïde, 
+mais pourrait être n'importe quelle fonction mathématique qui s'adapterai mieux au problème que l'on essaye de résoudre.
 
 Avec un seul perceptron, il est possible d'ajuster ces poids de telle manière à lui faire apprendre une motif de
 séparation linéaire en fonction des données d'entrée. 
@@ -53,69 +58,158 @@ séparation linéaire en fonction des données d'entrée.
 	\caption[Comparaison de données séparables ou non linéairement]{Comparaison de données séparables ou non linéairement. Source : \cite{LinearSeparation}}
 \end{figure}
 
-Il a donc été rapidement imaginé d'interconnecter ces perceptrons pour permettre d'apprendre des problèmes non linéaires.
+Il a donc été rapidement imaginé d'interconnecter ces perceptrons pour permettre d'apprendre des problèmes non linéaires. 
+Créant l'architecture la plus simple le "Multi Layer Perceptron" ou perceptron multi-couches.
 
 \subsection{Multi Layer Perceptron}
-L'architecture la plus simple de réseaux de neurones est de simplement connecter chaque couche de neurones entre eux.
 
-%TODO MLP image
-
-
-
-
-\section{Données}
-
-
-
-
-% Au cours de ce projet, j'ai tester différentes configuration de réseau de neurones sur des données.
-% Celles-ci sont des données provenant de simulation. Le premier simulateur que j'ai utilisé s'appelle
-
-%%%%%%%%%%%%%%%%%%%%%% chap 2 maintenant
-% \section{Remise en contexte}
-% La problématique qui a lancé ce projet est la quantité limitée de bande passante de transmission à bord de Terzina. 
-% La bande passante du satellite NUSES est partagée avec Zirè et limite donc Terzina à 40Gbit par jour en transmission et quelques Kbit en réception.
-% Bien que les capteurs aient déjà un déclanchement matériel, celui-ci était jugé comme insuffisant par l'équipe de l'\gls{unige} pour filtrer 
-% les évènements d'intérêt scientifique sans dépasser la limite de transmission.
-
-% Il a donc été proposé de rajouter un réseau de neurones qui pourrait être capable de filtrer le bruit de chaque pixel pour n'en garder que 
-% l'onde connue des photons de pluies atmosphériques. Avec ce signal filtré, une décision d'envoyer ou non l'évènement au sol
-% serait plus simple. 
-
-% Le réseau de neurones est prévu d'être programmé directement dans un \gls{fpga} pour des raisons d'optimisations de ressources à bord. 
-% Le fait de déployer le modèle de réseau de neurones ne fait pas partie intégrante de ce travail mais implique une
-% restriction technique car la programmation du \gls{fpga} ne sera possible qu'avant le lancement.
-% De plus, les ressources à bord étant coûteuses, le modèle sera aussi conçu pour être le plus petit possible 
-% afin d'utiliser le moins de place et de puissance de calcul.
-% Il est prévu d'utiliser un modèle Keras pour le réseau de neurones, car il existe déjà des moyens de l'exporter vers des \gls{fpga}.
-
-% En plus de cette utilisation en tant que filtre, il a été théorisé avec l'équipe de l'\gls{unige} que le réseau de neurones
-% pourrait aussi compenser l'usure/l'irradiation des capteurs. Ceci pourrait être fait par un ajustement en vol des poids du réseau de neurones 
-% ou par le fonctionnement du modèle lui-même.
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Simulateurs d'onde}
-Le début de mon projet a consisté à récupérer deux simulateurs de photomultiplicateurs et à m'acclimater à ce domaine de la physique.
-Pendant toute la mise en place de ces simulateurs, j'ai aussi installé un environnement de développement avec les librairies Python et les drivers Nvidia.
+Cette architecture de réseaux de neurones consiste simplement à créer 3 types de couches avec un nombre variable de perceptron pour chacune d'entre-elles :
 
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{sensor_waveform.png}
-	\caption[Exemple d'onde simulée]{Exemple d'onde simulée en sortie de capteur/ASIC.}
+	\includegraphics[width=0.4\linewidth]{MLP.png}
+	\caption[Exemple d'un perceptron multi-couches]{Exemple d'un perceptron multi-couches. Source : \cite{MLPImage}}
 \end{figure}
 
-Le premier : "terzina\_wfsim" est un simulateur développé en C/C++ qui génère des fichiers ROOT contenant l'onde en sortie du capteur.
-Cependant, celui-ci s'est révélé limité très rapidement car les fichiers créés contiennent l'onde attendue combinée avec du bruit simulé,
-mais la simulation d'un photon à haute énergie n'était faite qu'une seule fois au même endroit pour chaque onde.
+\begin{itemize}
+	\item 1 couche d'entrée : Cette couche représente seulement les valeurs d'entrées de manière organisée, 
+	par exemple une image de 10x10 pixels aurait une couche de taille 100. 
+	\item $x$ nombre de couches cachées : Ici un nombre de couches indéterminées peuvent être ajoutées. 
+	Chacune d'entre elles ont peuvent avoir un nombre de neurones différents dépendant du problème à traiter. d'analyser les 
+	\item 1 couche de sortie : Cette couche peut aussi avoir une taille variable deépendant de ce que le modèle doit accomplir. 
+	Par exemple si le modèle à comme but de détecter si une image est un chat ou non cette couche pourrait n'avoir qu'un neurone avec une fonction d'activation sigmoïde.
+\end{itemize}
 
-Le deuxième : "pe\_extractor" \cite{PeExtractor} est un projet contenant un simulateur d'onde couplé à des tests de machine learning pour détection de \gls{pe} développé en Python.
-Le concept de "photo électron" ou \gls{pe} est en réalité la charge électrique détectée par le capteur due à une interaction avec un photon dans le photomultiplicateur.
-Ce projet ne partageant pas les mêmes problèmes de génération de données que le précédant et étant capable de générer des données en continu dans des programmes Python,
-nous avons préféré concentrer nos efforts sur celui-ci.
+Entre chacune de ces couches, chaque neurone est connecté avec chacun des autres de la couche suivante, créeant des couches surnommées "denses".
 
-Les premières semaines de ce travail ont été dédiées à faire fonctionner ce générateur ainsi qu'à analyser son fonctionnement et ses paramètres.
-Il fonctionne en simulant du bruit et en y rajoutant des interactions électriques par un fichier d'impulsion modèle. 
-Le générateur va nous fournir deux tableaux en sortie : le signal discrétisé et des bacs contenant la vérité du nombre de \gls{pe} ayant été injectés sur cette période.
+\subsection{Apprentissage}
+
+Peu importe le nombre de couches ou de neurones qui composent un réseau, il faut bien que celui-ci aprenne à résoudre le problème pour lequel il a été conçu.
+Cet apprentissage se repose sur les bases mathématiques que le perceptron utilise. 
+Lorsque l'on calcule le résultat d'un perceptron celui-ci va en calculer une ou plusieurs valeurs en sortie.
+Lors d'un apprentissage supervisé, les valeurs de sortie attendues sont connues. On peut en calculer une valeur d'erreur avec une fonction mathématique.
+Nous avons donc volonté dans ce cas de minimiser cette fonction d'erreur. Et il est possible de le faire en modifiant les poids des valeurs d'entrées. 
+La manière de trouver comment modifier ces poids s'apelle la descente de gradient.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.8\linewidth]{gradient_descent.png}
+	\caption[Exemple d'une descente de gradient en 3D]{Exemple d'une descente de gradient en 3D. Source : \cite{GradientDescentImage}}
+\end{figure}
+
+Il est donc possible de trouver comment modifier les valeurs de chaque poids ou bias
+de chaque neurones afin de minimiser la fonction d'erreur et cela s'appelle la "backward propagation error" ou
+"backpropagation".
+
+Un piège fréquent lors de l'entraînement de réseaux neuronaux est l'overfitting. Le processus d'apprentissage fonctionne parfois trop "bien"
+su les données utilisées, jusqu'au point ou le réseau de neurones à trouver des correspondances ou des motifs qui ne sont pas ceux que l'on recherche.
+Le rendant hyper spécifié à nos données d'entraînement uniquement.
+
+Par exemple, pour un réseau essayant de différencier des images de chaussures d'autres vêtements. Si, malheureusement, toutes les chaussures sont vertes,
+le réseau pourrait en déduire que c'est la couleur qui permet de les différencier. Cependant, lorsque le modèle sera présenté 
+une chaussure rouge qui ne faisait pas partie des données d'entraînement celui-ci ne la reconnaitra pas.
+
+\subsection{Réseau de neurones convolutif}
+
+Comme évoqué précedemment, il existe une infinité d'autres configuration pour un réseau de neurones, alors nous ne regarderons en détails 
+que les différentes configurations qui ont été envisagées dans ce projet.
+
+L'une des premières architecture de réseau neuronal qui a été envisagée pour ce projet à été le réseau de neurones convolutif.
+Celui-ci consiste à certaines couches cachées d'une manière spécifique qui effectuera le même calcul qu'une convolution.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.4\linewidth]{Conv_layer.png}
+	\caption[Illustration d'une couche convolutive de réseau neuronal]{Illustration d'une couche convolutive de réseau neuronal. Source : \cite{ConvImage}}
+\end{figure}
+
+L'opération de convolution en mathématique permet généralement d'extraire des informations d'une image comme le taux de 
+variation d'intensité entre chaque pixel lors d'une détection de contours par exemple.
+Ici, la différence est que le noyau utilisé pour la convolution n'est pas un noyau provenant d'algorithmes comme Sobel ou Canny mais ce sera
+l'apprentissage du réseau qui va établir un noyau le plus optimisé pour trouver les caractéristiques recherchées dans les données d'entrée.
+
+\subsection{Réseau de neurones récurrents}
+
+Un autre type de réseau neuronal est le réseau de neurones récurrents. Cette architecture est adaptée
+à des problèmes comprenant des données séquentielles ou temporelles généralement comme de la détection automatique de parole ou de texte.
+
+Cette architecture diffère des autres réseaux de neurones car elle contient un mécanisme de "mémoire" intégré dans le modèle.
+La mémoire est généralement implémentée en connectant sortie du premier neurones comme une entrée supplémentaire a la couche cachée du deuxième neurone.
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.8\linewidth]{rnn.png}
+	\caption[Illustration de réseau de neurones récurrents]{Illustration de réseau de neurones récurrents. Source : \cite{RnnImage}}
+\end{figure}
+
+Cette "mémoire" n'existe donc que de manière temporaire à chaque exécution du réseau. Certains autres configuration comme les LSTM pour "Long and Short Term Memory"
+sont aussi capable de se souvenir sur un plus long terme.
+
+\subsection{Auto-encodeurs}
+
+Lors de la première partie de ce projet se focalisant sur les problématiques du télescope Terzina, un autre type de réseau 
+avait été envisagé pour sa capacité à compresser des données : les auto-encodeurs.
+
+L'auto-encodeur est une architecture de réseau de neurones particulière qui comprend deux parties distinctes d'encodage et de décodage. 
+Ces deux étapes peuvent aussi être perçues comme une compression et décompression successive. \cite{IbmAutoencoder}
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.4\linewidth]{Autoencoder.png}
+	\caption[Schéma d'auto-encodeur]{Schéma d'auto-encodeur. Source : \cite{Autoencoder}}
+\end{figure}
+
+En entraînant le réseau de neurones, celui-ci va apprendre à réduire les informations en entrée jusqu'à un minimum pour 
+ensuite essayer de reproduire au mieux les données originales à partir de cette représentation réduite.
+Ceci résulte en général en une perte de précision des données lors de la compression.
+
+\subsection{Couches}
+Les configurations vues jusqu'à maintenant peuvent aussi être combinées entre elles pour former de plus grand réseaux de neurones.
+Les réseaux neuronaux peuvent donc avoir une partie de réseau CNN et RNN, etc. Chacune des couche peut-ainsi être catégorisée par
+rapport à sont utilité.
+Il existe aussi plus de couches spécifiques capable de travail spécifique. En voici plusieurs utilisées au cours de ce travail ainsi que leur utilité :
+
+\subsubsection{BatchNormalisation}
+La couche "BatchNormalisation", en général utilisée en premier dans un réseau, sert à normaliser les données qui lui sont données.
+Cela sert à généraliser le reste du traitement du réseau, par exemple si l'on traitait des images avec des expositions différentes.
+
+\subsubsection{Flatten}
+Lors de l'utilisation de couches de convolution, il est possible d'en effectuer plusieurs en même temps et de les traiter parallèlement.
+On peut ensuite utiliser une couche "Flatten" pour rassembler ces données en une seule dimension.
+
+\subsubsection{Pooling}
+Ce type de couche dans un réseau neuronal permet de réduire le nombre de dimensions qui lui sont données en entrées.
+Ses utilités sont de réduire la quantité de calculs suivant cette couche et réduit l'overfitting lors de l'entraînement.
+
+Les deux manières les plus communes pour effectuer un pooling est de garder la moyenne ou le maximum de chaque dimension :
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.4\linewidth]{pooling_layers.jpeg}
+	\caption[Illustration du principe de Pooling]{Illustration du principe de Pooling. Source : \cite{PoolingImage}}
+\end{figure}
+
+\subsubsection{Dropout}
+Cette couche sert une même utilité que le Pooling en réduisant le nombre d'entrées qui sont passés à la suite du réseau afin d'en réduire l'overfitting.
+Cependant, ici il ne s'agit pas de transformation au niveau des dimensions mais une simple gestion de pourcentage qui sera gardée/épurée.
+
+\section{Données}
+
+Une autre grande partie de ce projet à été la gestion des données utilisées pour tester les différents réseaux de neurones.
+
+\subsection{Pe Extractor}
+
+Le premier simulateur qui a été fourni provenait d'un projet existant de l'\gls{unige} s'appelant "pe\_extractor".
+Ce projet Python contient un générateur de signal avec du bruit NSB dans lequel des photon-électron sont insérés.
+Le concept de photon-électron ou \gls{pe} est l'interaction physique lorsqu'un photon est détecté par un capteur et converti en charge électromagnétique analogique.
+Cette quantité électromagnétique est appelée photon-électron.
+
+Le bruit NSB pour un télescope est le bruit de fond minimum lorsqu'il pointe le ciel pendant la nuit. Même dans ces meilleurs condition,
+de la lumière provenant des villes et de l'atmosphère est détectée par le télescope. 
+De manière aléatoire et selon une fréquence donnée, le générateur ajoute au signal l'amplitude simulée d'un photon-électron.
+Cette amplitude est définie par un fichier d'impulsion qui dépend du capteur utilisé.
+
+Le générateur fournis deux tableaux en sortie : le signal discrétisé et des bacs contenant la vérité du nombre de \gls{pe} ayant été injectés sur cette période.
 
 Voici les paramètres importants du générateur et leur explication :
 \begin{enumerate}
@@ -134,87 +228,32 @@ Voici les paramètres importants du générateur et leur explication :
     \item "noise\_lsb" : Est une quantité de bruit électronique.
 \end{enumerate}
 
-\section{Architectures envisagées}
-Lors de nos premiers échanges, trois types de réseaux de neurones étaient envisagés pour répondre aux attentes de ce projet :
-
-\subsection{Auto-encodeur}
-L'auto-encodeur est une architecture de réseau de neurones particulière qui comprend deux parties distinctes d'encodage et de décodage. 
-Ces deux étapes peuvent aussi être perçues comme une compression et décompression successive. \cite{IbmAutoencoder}
+Les bacs contenant les photons insérés dans le signal bruité à une meilleure résolution que le signal discrétisé. 
+Une première adaptation a été programmée pour regroupper ces bacs sur la même fréquence d'échantillonage du signal :
 
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=0.4\linewidth]{Autoencoder.png}
-	\caption[Schéma d'auto-encodeur]{Schéma d'auto-encodeur. Source : \cite{Autoencoder}}
+	\includegraphics[width=\linewidth]{sensor_waveform.png}
+	\caption[Exemple de signal simulé]{Exemple de signal simulé.}
 \end{figure}
 
-En entraînant le réseau de neurones, celui-ci va apprendre à réduire les informations en entrée jusqu'à un minimum pour 
-ensuite essayer de reproduire au mieux les données originales à partir de cette représentation réduite.
+\subsection{Fichiers de simulation Corsika}
 
-Ce type de réseau pourrait bien fonctionner pour compresser les données des capteurs afin de les transmettre de manière compressée jusqu'au sol.
-Cependant le fonctionnement des auto-encodeurs implique généralement une perte de précision notable lors de l'encodage des données.
-Cela pourrait ne pas être un problème en soi pour la détection de la lumière Cherenkov. Cependant il est ressorti lors de nos réunions
-une envie de garder des données plus près de celles en sortie des \gls{asic}, surtout pour la première mission qu'est Terzina.
+Le premier simulateur de signal provenant de "pe\_extractor" ne simule que des interférences de type NSB. 
+Pour se rapprocher des données réelles des caméras, il a été choisi de récupérer des fichiers de simulation de pluies Cherenkov pour le \gls{lst}.
 
-\subsection{Réseau de neurones récurrents}
-Un autre type de réseau neuronal que nous avions envisagé est le réseau de neurones récurrents. Cette architecture est adaptée
-à des problèmes comprenant des données séquentielles ou temporelles généralement comme de la détection automatique de parole ou de texte.
+Ces fichiers de simulations contiennent énormément de données, de la configuration du télescope, jusqu'au impact des photons provenant des pluies Cherenkov.
+Ceux-ci sont stockés sur le partage de fichiers du cluster Yggdrasil de l'\gls{unige} sous un format de fichier ROOT. 
 
-Cette architecture diffère des autres réseaux de neurones car elle contient un mécanisme de "mémoire" intégré dans le modèle.
-La mémoire est généralement implémentée en connectant la dernière sortie du modèle comme une entrée supplémentaire.
+ROOT est un framework logicel conçu par le \gls{cern} pour l'analyse de données et la gestion d'entrées et sorties. Ces types de fichiers
+sont souvents utilisés pour stocker de manière structurée des données provenant d'expériences scientifiques en tant qu'arbres et tableaux
+pour réduire l'espace de stockage utilisé par un ficher.
 
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=0.4\linewidth]{rnn.png}
-	\caption[Illustration de réseau de neurones récurrents]{Illustration de réseau de neurones récurrents. Source : \cite{RnnImage}}
-\end{figure}
+Ces différentes données ne sont pas utilisables directement et doivent être réinterprétées par le logiciel "pyeventio\_example" aussi fournis
+par l'équipe de l'\gls{unige}. Ce projet met à disposition un exécutable nommé "runana" qui permet de recréer un fichier binaire 
+contenant certaines métadonnées, le signal de chaque capteur composant la caméra du télescope et les instants auxquels les photons 
+provenant de la pluie Cherenkov ont impactés le capteurs.
 
-% Ce type de réseau serait le mieux adapté à un flux de données continues mais les \gls{asic} et leur déclencheur matériel
-% ne fournissent que des fenêtres d'un certain nombre d'échantillons dans un laps de temps connu. 
-% Bien qu'un RNN puisse fonctionner avec des fenêtres, cela nous paraissait contre-productif.
-
-\subsection{Réseau de neurones convolutif}
-L'architecture d'un réseau convolutif est semblable à un réseau de neurones standard a quelques exceptions près.
-Dans un réseau de neurones standard, chaque neurone est connecté à chaque autre neurone des couches adjacentes;
-dans le cas d'un réseau de neurones convolutif, certaines couches sont connectée d'une manière spécifique qui,
-lorsqu'elle sera calculée, effectuera le même calcul qu'une convolution.
-
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=0.4\linewidth]{Conv_layer.png}
-	\caption[Illustration d'une couche convolutive de réseau neuronal]{Illustration d'une couche convolutive de réseau neuronal. Source : \cite{ConvImage}}
-\end{figure}
-
-L'opération de convolution en mathématique permet généralement d'extraire des informations d'une image comme le taux de 
-variation d'intensité entre chaque pixel lors d'une détection de contours par exemple.
-Ici, la différence est que le noyau utilisé pour la convolution n'est pas un noyau provenant d'algorithmes comme Sobel ou Canny mais c'est à nouveau
-l'apprentissage du réseau qui va établir un noyau le plus optimisé pour trouver les caractéristiques recherchées dans les données d'entrée.
-
-Dans le cadre de Terzina, c'est l'approche que nous avons privilégiée de par sa simplicité et le peu de resources qu'elle utilise.
-
-%%%%%%%%%%%%%%%%% Chap 2 maintenant
-% \section{Terzina - Retards de production}
-% En mars dernier, lors de rendez-vous de coordination pour le projet Terzina, un retard conséquent sur la production des \gls{asic} prévus pour les capteurs à été révélé.
-% Il a donc été décidé de remplacer ces \gls{asic} par un modèle déjà existant : CITIROC. Cependant, ces nouveaux \gls{asic} ne sont pas capables de transmettre une 
-% onde comme les \gls{asic} prévus jusqu'à présent.
-% Cet imprévu rend donc l'utilisation d'un réseau de neurones impossible à bord de Terzina. Cependant, il est encore intéressant de développer 
-% ce modèle pour une utilisation dans de futurs satellites qui succèderont à Terzina. 
-
-% J'ai donc été introduit au projet CTLearn et l'environnement qui l'entoure. 
-% Ce projet est entre autre conçu pour classifier des pluies de lumière Cherenkov, 
-% et pourrait possiblement bénéficier d'une étape de pré-traitement par pixels comme pour Terzina.
-
-% \begin{figure}[tbph!]
-% 	\centering
-% 	\includegraphics[width=0.6\linewidth]{ctlearnworkflow.png}
-% 	\caption[Workflow CTLearn]{Workflow CTLearn. Source : \cite{CTLearn}}
-% \end{figure}
-
-% \section{Suite du travail}
-% Ce projet de semestre en l'état a prouvé un intérêt pour une étape de prétraitement par pixel pour tout type d'\gls{iact} et pour de futurs télescopes spatiaux.
-% Il a aussi été possible de déterminer les éléments nécessaires pour une possible utilisation de cette étape de prétraitement :
-% \begin{itemize}
-%     \item Établir un ou plusieurs métriques, ceci afin de pouvoir quantifier les améliorations ou régressions dues à des changements du modèle.
-%     \item Établir un banc de test plus complet prenant en compte des facteurs externes comme la dégradation de capteurs ou autre.
-%     \item Intégrer le modèle dans le simulateur CTLearn pour possiblement en améliorer ses performances et prouver une utilité pour des \gls{iact} terrestres.
-% \end{itemize}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \section{Outils}
+% \subsection{Tensorflow}
+% \subsection{Keras}

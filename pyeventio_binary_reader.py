@@ -122,7 +122,9 @@ class SimEvent:
                 f"nn_fadc_point : {self.nn_fadc_point}\n" + \
                 f"fadc_sample_in_ns : {self.fadc_sample_in_ns}\n" + \
                 f"NGB_rate_in_MHz : {self.NGB_rate_in_MHz}\n" + \
-                f"fadc_electronic_noise_RMS : {self.fadc_electronic_noise_RMS}"
+                f"fadc_electronic_noise_RMS : {self.fadc_electronic_noise_RMS}\n" + \
+                f"channel_waveforms : {np.array(self.channel_waveforms).shape}\n" + \
+                f"channel_pe_truths : {np.array(self.channel_pe_truths).shape}"
 
 def dataset_split(self, ratio: float = 0.8) -> tuple[Dataset, Dataset]:
     """
@@ -158,7 +160,7 @@ def dataset_from_simulations(sim_events: list[SimEvent], window_size: int, max_d
     
     # return final_set
 
-def simevents_from_dir(dirPath: str) -> list[SimEvent] :
+def simevents_from_dir(dirPath: str, sample_delay: int = 2) -> list[SimEvent] :
     """
     Read all binary output files in given folder from the corsika simulations.
     """
@@ -166,11 +168,11 @@ def simevents_from_dir(dirPath: str) -> list[SimEvent] :
     
     for file in os.listdir(dirPath):
         if file.endswith(".bin"):
-            events.append(simevent_from_file(os.path.join(dirPath, file)))
+            events.append(simevent_from_file(os.path.join(dirPath, file), sample_delay))
     
     return events
 
-def simevent_from_file(filePath: str) -> SimEvent : 
+def simevent_from_file(filePath: str, sample_delay: int = 2) -> SimEvent : 
     """
     Read binary output file from the corsika simulations.
     From the binary data, reproduce the waveform + photon detection truth.
@@ -204,8 +206,7 @@ def simevent_from_file(filePath: str) -> SimEvent :
         ch_id = int.from_bytes(br.read_bytes(4), byteorder="little", signed=False) - 1
         # print(f"byte {br.i}  : ch_id {ch_id}")
         pe_hit_time = struct.unpack('f', br.read_bytes(4))[0]
-        
-        sample_delay = 2
+
         pe_hit_sample = math.ceil(pe_hit_time / fadc_sample_in_ns) + sample_delay
         if(pe_hit_sample >= 0 and pe_hit_sample < nn_fadc_point):
             channel_pe_truths[ch_id][pe_hit_sample] += 1

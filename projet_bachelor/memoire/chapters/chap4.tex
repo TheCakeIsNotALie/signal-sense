@@ -1,14 +1,189 @@
 % !TeX spellcheck = fr_FR
 \chapter{Chapitre 4 : Résultats}
 
+% Ce chapitre se porte sur le
+
+
 %TODO comparaisons qui soient bien justifiées et qui soient dans le même pipeline et données
 
-%TODO Faire un chapitre sur la gestion des données et complexité de cela
+% \subsection{Réseau de neurones convolutif}
+% Dans le cadre de Terzina, c'est l'approche que nous avons privilégiée de par sa simplicité et le peu de resources qu'elle utilise.
+
+\section{Gestion des données}
+La première étape du projet a été de maitriser et formatter les données des simulateurs. 
+
+\subsection{Pe Extractor}
+Dans un premier temps cela n'a été qu'avec le projet "pe\_extractor".
+Comme évoqué lors du chapitre précedent, la génération des bacs contenant la vérité des photons détectés n'a pas la même fréquence que celle du signal.
+J'ai donc adapté ces deux fréquences en regroupant les différents bacs sur la même période que le signal :
+
+\begin{lstlisting}[language=iPython,caption={Regroupement des bacs de photons insérés, signal\_sense.ipynb},captionpos=b]
+# generator variables
+n_sample = 200000
+n_sample_init = 0
+batch_size = 1
+shift_proba_bin = 30
+sigma_smooth_pe_ns = 0
+bin_size_ns = 0.20
+sampling_rate_mhz = 1000 #200 MHz is the sampling rate of terzina
+				#250 SST1M
+				#1000 LST + MST
+pe_rate_mhz = 150 # 1 to 150 MHz
+noise_lsb=4. # 3.5 to 5.5
+amplitude_gain=16.
+relative_gain_std=0.05
+
+# computed variables
+sampling_period_s = 1 / (sampling_rate_mhz * 1e6)
+bin_per_sample = ceil(((sampling_period_s) * 1e9) / bin_size_ns)
+
+# parameters omitted for brevity
+gen = generator_nsb(...)
+data = next(gen)
+
+# data contains in index 0 the configurable batches of the discrete signal
+# and in index 1 the batches of truth
+# here we configured only 1 batch, which explains the [1][0]
+summed_bins = np.sum(data[1][0].reshape(-1, bin_per_sample), axis=1)
+\end{lstlisting}
+
+Ce qui nous donne le couple de données suivante :
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{PeExtractorDataAndTruth.png}
+	\caption[Exemple de données générées par "pe\_extractor"]{Exemple de données générées par "pe\_extractor".}
+\end{figure}
+
+Les configurations des paramètres du générateur sont restés majoritairement les mêmes au cours du projet 
+sauf ceux commentés qui ont évolués au cours du projet, de Terzina aux télescopes terrestres.
+
+\subsection{Fichiers de simulation Corsika}
+
+Pour utiliser ces fichiers de simulations, il a d'abord fallu recréer les signaux avec l'outil qui m'avait été fourni par l'\gls{unige} : "pyeventio\_example".
+Sur le cluster Yggdrasil, j'ai compilé et utilisé l'exécutable "runana" de manière distribuée grace à un script bash :
+
+\begin{lstlisting}[language=iBash,caption={Script de génération des signaux à partir de fichier de simulation, data/slurm-run.sh},captionpos=b]
+#!/bin/sh
+
+# manage cluster modules
+module purge
+module load GCC/11.2.0  OpenMPI/4.1.1 ROOT/6.24.06
+
+# select events range to generate
+ev_start=0
+ev_stop=1000
+
+# select the simulation file
+inRootFiles="/srv/beegfs/scratch/shares/heller/Leonid/mono-lst-sipm-pmma-3ns-v1_triggerless/gamma/0000/corsika_0000ID.root"
+rndseed="1312312"
+
+for ((evID=ev_start; evID<=ev_stop; evID++))
+do
+	# location of output file
+	binFileOut="/home/users/p/perrinya/scratch/bin_data/gamma_ev"$evID"_out.bin"
+	# recreate complete waveform with truths
+	srun --time "00:00:30" /home/users/p/perrinya/pyeventio_example/runana 333 "$inRootFiles" "$evID" "$binFileOut" "$rndseed" &
+done
+\end{lstlisting}
+
+Les fichiers binaires produits utilisent beaucoup plus de place que les fichiers ROOT. Par exemple, le fichier "corsika\_0000ID.root" comportant les
+informations nécessaires à reconstruire environ $500'000$ pluies Cherenkov, d'une durée d'environ $75ns$ chacune, ne pèse que $1.2GB$.
+En comparaison, les fichier binaires prennent plus de $2.38GB$ pour seulement 1000 évènements. 
+La totalité des signaux brutes du fichier prendrait une taille de : $500'000/1000 * 2.38GB = 1.19TB$
+
+Cependant, ces fichiers binaires ne sont que la première étape pour créer un jeu de données utilisable par nos réseaux de neurones.
+Ceux-ci sont structurés de la manière suivante :
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{Pyeventio_binary_file_content.drawio.png}
+	\caption[Structure des fichiers binaires de simulations]{Structure des fichiers binaires de simulations.}
+\end{figure}
+
+J'ai donc du créer un lecteur capable de parser ces fichiers binaires et de recréer une vérité sur la même fréquence que le signal d'entrée.
+Pour cela, la lecture du header et du signal ce fait simplement en lisant et stockant des variables dans des tableaux en mémoire.
+Cependant quelques calculs et vérifications doivent être faites pour les photons détectés par la caméra. 
+En premier, il faut convertir l'instant de l'impact en numéro d'échantillon en divisant par la période d'acquisition.
+Puis il faut vérifier si ce photon a bien été capturé pendant la durée du signal, car ceux-ci peuvent avoir été détectés
+avant ou après, ceci probablement dû à la gestion de la simulation.
+
+\newpage
+Au final on se retrouve avec des données similaires au premier simulateur :
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{BinaryRecomposedSignalTruth.png}
+	\caption[Exemple de données générées par simulations Corsika]{Exemple de données générées par simulations Corsika.}
+\end{figure}
+
+Cependant, même dans cet état, les données ne sont pas encore utilisables. Lorsque l'on regarde l'amplitude 
+du signal contenu dans ces fichiers binaires, ceux-ci sont encodés sur des entiers. Pour réduire ces valeurs avant d'essayer
+d'entraîner des réseaux neuronaux, il m'a été conseillé de normaliser ces données en les divisant par 8,5 en rapport avec les
+capteurs simulés.
+
+De plus, nous avons découvert que les temps d'impacts des photons détectés étaient un peu en avance par rapport
+au signal. Nous avons donc ajouté un délai de 2 échantillons lors du parsing du fichier, pour que les pics de vérité arrivent en 
+même temps ou avec un léger retard pour que le réseau de neurones puisse utiliser les échantillons précédents comme information utile.
+
+\newpage
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{BinaryRecomposedSignalTruthNormalized.png}
+	\caption[Données Corsika normalisées]{Données Corsika normalisées.}
+\end{figure}
+
+\subsection{Séparation des données en fenêtres coulissantes}
+
+Peut-importe la manière utilisée pour générer les données, chacun des ensembles a été séparés en plus petites parties pour les entraînements.
+Cela pour plusieurs raisons.  Au départ, pour Terzina, cela était prévu pour garder le modèle le plus petit possible en limitant le nombre d'entrées
+utilisées. Cependant, une fois le projet redirigé pour êetre utilisé au sol, la volonté d'avoir un réseau de neurones 
+capable d'être exécuté en quasi-temps réel pour la latence restait intéressant. 
+
+Pour limiter la quantité d'entrées utilisées, il est possible de ne regarder le signal et le tableau de vérité associer partie par partie.
+Cette technique s'appelle "sliding window" ou fenêtre coulissante, car c'est comme si l'on regardait nos données à travers une fenêtre coulissante
+que l'on déplace du début à la fin celles-ci :
+\newpage
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{Sliding window.drawio.png}
+	\caption[Exemple de séparation des données par fenêtre coulissante]{Exemple de séparation des données par fenêtre coulissante.}
+\end{figure}
+
+Cette technique existant déjà il existe une fonction dans la librairie Numpy capable de séparer des données ainsi.
+Il est quand même important de ne pas séparer le signal de la vérité. 
+
+Au début des tests, plusieurs configuration de taille de fenêtres ont été testées, 7, 11, 21 jusqu'à un maximum de 51. 
+Ces chiffres ont été choisis de manière manuelle dans ce qui avait l'air acceptable pour résoudre ce problème,
+tout en minimisant la taille du réseau. Ces différentes tailles de fenêtres n'ont jamais tellement affectés les résultats 
+car du moment qu'un pic était contenu entièrement dans les valeurs d'entrées les modèle semblait avoir assez de données pour le détecter.
+La taille de 21 a été gardée pour la majorité du travail car cela aurait été la taille des données en sortie des \gls{asic} de Terzina.
+
+\subsection{Création de dataset}
+C'est pendant cette même étape de séparation que l'on peut facilement effectuer deux autres actions pour améliorer notre dataset.
+
+La première action, est de séparer nos données en deux. La première partie sera utilisée pour entraîner le réseau tandis que la deuxième ne
+lui sera jamais montré lors de l'entraînement mais seulement lors d'une étape de validation. Cela dans l'optique d'éviter l'overfitting
+et valider que le modèle puisse fonctionner sur des données qu'il n'a jamais vu auparavant.
+
+La deuxième action consiste à mélanger le dataset pour éviter de s'entraîner avec des données dans l'ordre, pour pousser 
+le modèle à trouver des motifs dans les données mêmes.
+
+\subsection{Corsika répartition du dataset}
+Spécifiquement dans le cas des données Corsika, il s'est rapidement avéré que la répartition des \gls{pe} dans le dataset était problématique.
+Cela paraît logique
+
+
+
+
 
 \section{Prototypage}
-Pour débuter le prototypage, j'ai commencé à mettre en place un réseau neuronal convolutif de régression simple qui prend en 
-entrée une fenêtre de taille fixe, qui contiendra les échantillons du signal de manière séquentielle dans le temps.
-Et dont le résultat est une estimation de la probabilité qu'un \gls{pe} soit présent au centre de la fenêtre analysée :
+
+\subsection{Détection booléenne de photon-électron}
+Au tout début du projet, j'ai essayé de simplement détecter la présence ou non d'au moins un \gls{pe} dans une des fenêtres des données générées par le simulateur "pe\_extractor".
+
+Comme premier essai de 
+'ai commencé à mettre en place un réseau neuronal convolutif de classification simple.
+Le résultat attendu de ce réseau est une estimation de la probabilité qu'au moins un \gls{pe} soit présent au centre de la fenêtre analysée.
 
 \begin{figure}[tbph!]
 	\centering
