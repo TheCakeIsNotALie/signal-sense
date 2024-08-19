@@ -1,21 +1,14 @@
 % !TeX spellcheck = fr_FR
 \chapter{Chapitre 4 : Résultats}
 
-% Ce chapitre se porte sur le
+Ce chapitre se porte sur les différents essais qui ont été effectués et les résultats de ceux-ci.
+Le projet ayant été adapté en cours de route, les sous-chapitres sont organisés de manière chronologique.
 
-
-%TODO comparaisons qui soient bien justifiées et qui soient dans le même pipeline et données
-
-% \subsection{Réseau de neurones convolutif}
-% Dans le cadre de Terzina, c'est l'approche que nous avons privilégiée de par sa simplicité et le peu de resources qu'elle utilise.
-
-\section{Gestion des données}
-La première étape du projet a été de maitriser et formatter les données des simulateurs. 
-
-\subsection{Pe Extractor}
-Dans un premier temps cela n'a été qu'avec le projet "pe\_extractor".
-Comme évoqué lors du chapitre précedent, la génération des bacs contenant la vérité des photons détectés n'a pas la même fréquence que celle du signal.
-J'ai donc adapté ces deux fréquences en regroupant les différents bacs sur la même période que le signal :
+\section{Pe Extractor}
+La première étape du projet a été de maîtriser et formatter les données du premier simulateur "pe\_extractor".
+Comme évoqué lors du chapitre précédent, la génération des bacs contenant la vérité des photons détectés
+a une fréquence plus élevée que celle du signal.
+J'ai donc regrouper les différents bacs générés sur la même période que le signal :
 
 \begin{lstlisting}[language=iPython,caption={Regroupement des bacs de photons insérés, signal\_sense.ipynb},captionpos=b]
 # generator variables
@@ -25,8 +18,7 @@ batch_size = 1
 shift_proba_bin = 30
 sigma_smooth_pe_ns = 0
 bin_size_ns = 0.20
-sampling_rate_mhz = 1000 #200 MHz is the sampling rate of terzina
-				#250 SST1M
+sampling_rate_mhz = 1000 #200 MHz is the sampling rate of Terzina
 				#1000 LST + MST
 pe_rate_mhz = 150 # 1 to 150 MHz
 noise_lsb=4. # 3.5 to 5.5
@@ -47,8 +39,8 @@ data = next(gen)
 summed_bins = np.sum(data[1][0].reshape(-1, bin_per_sample), axis=1)
 \end{lstlisting}
 
+\newpage
 Ce qui nous donne le couple de données suivante :
-
 \begin{figure}[tbph!]
 	\centering
 	\includegraphics[width=\linewidth]{PeExtractorDataAndTruth.png}
@@ -56,7 +48,80 @@ Ce qui nous donne le couple de données suivante :
 \end{figure}
 
 Les configurations des paramètres du générateur sont restés majoritairement les mêmes au cours du projet 
-sauf ceux commentés qui ont évolués au cours du projet, de Terzina aux télescopes terrestres.
+sauf ceux commentés qui ont évolués au cours du projet dépendant du télescope visé. Il en va de même pour le ficher
+d'impulsion correspondant au télescope.
+
+\newpage
+\subsection{Création du dataset}
+Jusqu'à présent nous n'avons qu'un signal de $200'000$ échantillons. Dans notre cas, il faut un dataset libellé pour commencer 
+à entraîner un réseau de neurones. Pour cela, on peut utiliser une technique connue appelée "sliding window" ou fenêtre coulissante en français.
+Le nom de cette technique est très descriptif, car c'est comme si l'on regardait nos données à travers une fenêtre qui que l'on déplace du début à la fin celles-ci :
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=\linewidth]{Sliding window.drawio.png}
+	\caption[Exemple de séparation des données par fenêtre coulissante]{Exemple de séparation des données par fenêtre coulissante.}
+\end{figure}
+
+Cette technique existant déjà, j'ai utilisé la fonction de la librairie Numpy qui effectue cette transformation.
+La seule précaution effectuée a été de bien garder le signal et la vérité dans le même ordre.
+
+Le fonctionnement attendu du réseau de neurones à cet instant était de fonctionner en temps réel juste après les \gls{asic} à bord de Terzina.
+Il était donc prévu de garder le modèle le plus petit possible en limitant le nombre d'entrées utilisées. 
+
+Au début des tests, plusieurs configuration de taille de fenêtres ont été testées, 7, 11, 21 jusqu'à un maximum de 51. 
+Ces chiffres ont été choisis de manière manuelle dans ce qui avait l'air acceptable pour résoudre ce problème. 
+De plus, la conception des des \gls{asic} prévoyait de ne numériser qu'environ une vingtaine d'échantillons lors d'un déclenchement.
+Ces différentes tailles de fenêtres n'ont jamais tellement affectés les résultats. Ce qui a été observé est que du moment 
+qu'un pic était contenu entièrement dans les valeurs d'entrées les modèle semblait avoir assez de données pour le détecter.
+
+\section{Premiers tests}
+
+\subsection{Détection booléenne de photon-électron}
+Au tout début du projet, j'ai essayé de simplement détecter la présence ou non d'au moins un \gls{pe} exactement au centre de chaque fenêtre générée.
+
+Pour cela, j'ai mis en place un réseau neuronal convolutif de classification simple.
+Le résultat attendu de ce réseau est une seule estimation de la présence ou non d'un photon à l'échantillon central.
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{cnn_simple.drawio.png}
+	\caption[Diagramme de fonctionnement du premier CNN simple]{Diagramme de fonctionnement du premier CNN simple.}
+\end{figure}
+
+Les résultats observés de cette architecture n'étaient pas bons.
+Cela pour plusieurs raisons, le premier étant l'un des pièges les plus courant des réseaux neuronaux : des données erronées.
+Cette première erreur provenait de transformation des bacs en résultat booléen utilisé dans cette phase d'entraînement.
+Lors de cette transformation, l'échantillon testé pour la présence d'un \gls{pe} s'est avéré être le premier de la fenêtre.
+
+Cette première expérience m'a poussé à développer des vues au "cas par cas" où chaque inférence du modèle peut être examinée en détails.
+Cette vue affiche les données d'entrée, la vérité attendue et le résultat du modèle ce qui permet de visualiser son comportement après entraînement. 
+
+Cependant, même après avoir corrigé le dataset d'entraînement, les résultats, bien que légèrement améliorés, restaient non fiables à cause de beaucoup de
+faux positif et faux négatifs.
+
+\subsection{Estimation calorimétrique de photon-électron par régression}
+Pour permettre de au lieu d'entraîner le modèle sur une seule vérité au centre de la fenêtre analysée, ce serait sur chaque 
+échantillon que le réseau neuronal donnera une estimation de la présence ou non d'un \gls{pe}.
+
+Ce nouveau modèle a immédiatement mieux performé que le précédant :
+
+\begin{figure}[tbph!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{cnn_mult.drawio.png}
+	\caption[Diagramme de fonctionnement du deuxième CNN à multiple sortie]{Diagramme de fonctionnement du deuxième CNN à multiple sortie.}
+\end{figure}
+
+En modifiant les différents paramètres de chaque couche, il est aussi possible d'améliorer les performances de celui-ci.
+De plus, en ne calculant plus la présence de manière booléenne mais en estimant la quantité de \gls{pe} présents 
+en changeant la fonction d'activation finale pour utiliser la fonction mathématique "ReLU" qui n'est pas confinée 
+à l'intervalle $ \left[ 0, 1\right] $ comme la sigmoïde mais à $ \left[0, +\infty\right[ $, il est possible d'entraîner le modèle
+pour qu'il estime le nombre de \gls{pe} à un instant $t$ dans une fenêtre. 
+
+%TODO comparaisons qui soient bien justifiées et qui soient dans le même pipeline et données
+
+% \subsection{Réseau de neurones convolutif}
+% Dans le cadre de Terzina, c'est l'approche que nous avons privilégiée de par sa simplicité et le peu de resources qu'elle utilise.
+
 
 \subsection{Fichiers de simulation Corsika}
 
@@ -132,31 +197,16 @@ même temps ou avec un léger retard pour que le réseau de neurones puisse util
 	\caption[Données Corsika normalisées]{Données Corsika normalisées.}
 \end{figure}
 
-\subsection{Séparation des données en fenêtres coulissantes}
 
-Peut-importe la manière utilisée pour générer les données, chacun des ensembles a été séparés en plus petites parties pour les entraînements.
-Cela pour plusieurs raisons.  Au départ, pour Terzina, cela était prévu pour garder le modèle le plus petit possible en limitant le nombre d'entrées
-utilisées. Cependant, une fois le projet redirigé pour êetre utilisé au sol, la volonté d'avoir un réseau de neurones 
-capable d'être exécuté en quasi-temps réel pour la latence restait intéressant. 
 
-Pour limiter la quantité d'entrées utilisées, il est possible de ne regarder le signal et le tableau de vérité associer partie par partie.
-Cette technique s'appelle "sliding window" ou fenêtre coulissante, car c'est comme si l'on regardait nos données à travers une fenêtre coulissante
-que l'on déplace du début à la fin celles-ci :
-\newpage
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=\linewidth]{Sliding window.drawio.png}
-	\caption[Exemple de séparation des données par fenêtre coulissante]{Exemple de séparation des données par fenêtre coulissante.}
-\end{figure}
 
-Cette technique existant déjà il existe une fonction dans la librairie Numpy capable de séparer des données ainsi.
-Il est quand même important de ne pas séparer le signal de la vérité. 
 
-Au début des tests, plusieurs configuration de taille de fenêtres ont été testées, 7, 11, 21 jusqu'à un maximum de 51. 
-Ces chiffres ont été choisis de manière manuelle dans ce qui avait l'air acceptable pour résoudre ce problème,
-tout en minimisant la taille du réseau. Ces différentes tailles de fenêtres n'ont jamais tellement affectés les résultats 
-car du moment qu'un pic était contenu entièrement dans les valeurs d'entrées les modèle semblait avoir assez de données pour le détecter.
-La taille de 21 a été gardée pour la majorité du travail car cela aurait été la taille des données en sortie des \gls{asic} de Terzina.
+
+
+
+
+
+
 
 \subsection{Création de dataset}
 C'est pendant cette même étape de séparation que l'on peut facilement effectuer deux autres actions pour améliorer notre dataset.
@@ -171,48 +221,3 @@ le modèle à trouver des motifs dans les données mêmes.
 \subsection{Corsika répartition du dataset}
 Spécifiquement dans le cas des données Corsika, il s'est rapidement avéré que la répartition des \gls{pe} dans le dataset était problématique.
 Cela paraît logique
-
-
-
-
-
-\section{Prototypage}
-
-\subsection{Détection booléenne de photon-électron}
-Au tout début du projet, j'ai essayé de simplement détecter la présence ou non d'au moins un \gls{pe} dans une des fenêtres des données générées par le simulateur "pe\_extractor".
-
-Comme premier essai de 
-'ai commencé à mettre en place un réseau neuronal convolutif de classification simple.
-Le résultat attendu de ce réseau est une estimation de la probabilité qu'au moins un \gls{pe} soit présent au centre de la fenêtre analysée.
-
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=0.6\linewidth]{cnn_simple.drawio.png}
-	\caption[Diagramme de fonctionnement du premier CNN simple]{Diagramme de fonctionnement du premier CNN simple.}
-\end{figure}
-
-Le fonctionnement de cette architecture n'a pas donné de bons résultats, ceci à cause de plusieurs facteurs. Le premier est qu'à cause des paramètres
-de bacs du générateur, les premiers tests effectués se basaient sur des données erronées car les impulsions n'étaient pas centrées au centre de la fenêtre.
-
-Cette première expérience m'a aussi poussé à développer une vue au "cas par cas" où chaque inférence du modèle peut être examinée.
-Cette vue affiche les données d'entrée, la vérité attendue et le résultat du modèle ce qui permet de confirmer les données d'entraînement de celui-ci. 
-
-Cependant, même après avoir corrigé la configuration du générateur, les résultats, bien que légèrement améliorés, restaient non fiables à cause de beaucoup de
-faux positif et faux négatifs.
-
-Pour palier à cela, au lieu d'entraîner le modèle sur une seule vérité au centre de la fenêtre analysée, ce serait sur chaque 
-échantillon que le réseau neuronal donnera une estimation de la présence ou non d'un \gls{pe}.
-
-Ce nouveau modèle a immédiatement mieux performé que le précédant :
-
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=0.6\linewidth]{cnn_mult.drawio.png}
-	\caption[Diagramme de fonctionnement du deuxième CNN à multiple sortie]{Diagramme de fonctionnement du deuxième CNN à multiple sortie.}
-\end{figure}
-
-En modifiant les différents paramètres de chaque couche, il est aussi possible d'améliorer les performances de celui-ci.
-De plus, en ne calculant plus la présence de manière booléenne mais en estimant la quantité de \gls{pe} présents 
-en changeant la fonction d'activation finale pour utiliser la fonction mathématique "ReLU" qui n'est pas confinée 
-à l'intervalle $ \left[ 0, 1\right] $ comme la sigmoïde mais à $ \left[0, +\infty\right[ $, il est possible d'entraîner le modèle
-pour qu'il estime le nombre de \gls{pe} à un instant $t$ dans une fenêtre. 
