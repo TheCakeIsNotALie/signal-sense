@@ -20,9 +20,9 @@ def compute_sample_weights(samples):
     weight_fn = lambda x: 1/(counts[np.where(indices == x)[0][0]]) * (len(samples)/len(indices)/2)
     return np.array(list(map(weight_fn, samples)))
 
-def accuracy_m(y_true, y_pred):
-    # Determine the actual positives (values in y_true that are not 0)
-    actual_positives = tf.not_equal(y_true, 0)
+def accuracy_m(y_truth, y_pred):
+    # Determine the actual positives (values in y_truth that are not 0)
+    actual_positives = tf.not_equal(y_truth, 0)
     
     # Determine the true positives (actual positives where y_pred > 0.5)
     true_positives = tf.logical_and(actual_positives, y_pred >= threshold)
@@ -30,11 +30,11 @@ def accuracy_m(y_true, y_pred):
 
     correct_prediction_count = tf.reduce_sum(tf.cast(true_positives, tf.float32)) + tf.reduce_sum(tf.cast(true_negatives, tf.float32))
 
-    return correct_prediction_count / (tf.cast(tf.size(y_true), tf.float32) + tf.keras.backend.epsilon())
+    return correct_prediction_count / (tf.cast(tf.size(y_truth), tf.float32) + tf.keras.backend.epsilon())
 
-def recall_m(y_true, y_pred):    
-    # Determine the actual positives (values in y_true that are not 0)
-    actual_positives = tf.not_equal(y_true, 0)
+def recall_m(y_truth, y_pred):    
+    # Determine the actual positives (values in y_truth that are not 0)
+    actual_positives = tf.not_equal(y_truth, 0)
     
     # Determine the true positives (actual positives where y_pred > 0.5)
     true_positives = tf.logical_and(actual_positives, y_pred >= threshold)

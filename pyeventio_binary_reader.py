@@ -29,7 +29,7 @@ class Dataset:
     truth: list[list[int]]
     
     def get_truth_pe_distribution(self) -> dict:
-        print(self.truth.shape)
+        # print(self.truth.shape)
         # print(np.sum(truth_list, axis=1).shape)
         uniques, counts = np.unique(np.sum(self.truth, axis=1), return_counts=True)
         return dict(zip(uniques, counts))
@@ -40,6 +40,8 @@ class Dataset:
         np.random.shuffle(dataset)
         # apply the shuffled state 
         self.data, self.truth = zip(*dataset)
+        self.data = np.array(self.data)
+        self.truth = np.array(self.truth)
         
     
     def save_to_file(self, filePath: str):
@@ -227,21 +229,31 @@ def simevent_from_file(filePath: str, sample_delay: int = 2) -> SimEvent :
     
     
 if __name__ == "__main__":
+    # create dataset and save to file 
+    # sevents = simevents_from_dir("./data/small_bin_data")
+    # print("parsing done")
+    # dataset = dataset_from_simulations(sevents, window_size=21, max_dataset_count=1000000)
+    # print("windowing done")
+    # dataset.data /= 8.25
+    # print(dataset.get_truth_pe_distribution())
+    # dataset.save_to_file("./data/small_bin_data_not_distributed.cache.npz")
+    
+    
     # create data set and save to file 
-    # sevents = simevents_from_dir("./data/bin_data")
+    # sevents = simevents_from_dir("./data/small_bin_data")
     # print("parsing done")
     # dataset = dataset_from_simulations(sevents, window_size=21)
     # print("windowing done")
     # dataset.data /= 8.25
     # print(dataset.get_truth_pe_distribution())
-    # dataset.save_to_file("./data/gamma_distributed_delayed.cache.npz")
+    # dataset.save_to_file("./data/small_bin_data_distributed_delayed.cache.npz")
     
     # load dataset from file
-    dataset = load_dataset_from_file("./data/gamma_distributed_delayed.cache.npz")
-    dataset.shuffle()
-    # show all counts of dataset
-    np.set_printoptions(threshold=np.inf)
-    print(f"{np.sum(dataset.truth, axis=1)}") 
+    # dataset = load_dataset_from_file("./data/gamma_distributed_delayed.cache.npz")
+    # dataset.shuffle()
+    # # show all counts of dataset
+    # np.set_printoptions(threshold=np.inf)
+    # print(f"{np.sum(dataset.truth, axis=1)}") 
     
     # --------------------------------
     # Moving window Dataset display
@@ -286,7 +298,7 @@ if __name__ == "__main__":
     # sevent = simevent_from_file("./data/gamma_ev898128_out.bin")
     # print(sevent.training_waveform_windows(window_size=21).get_truth_pe_distribution())
     
-    # sevent = simevent_from_file("./data/gamma_on_nsb_1x_ev78_out.bin")
+    # sevent = simevent_from_file("./data/bin_data/gamma_ev101_out.bin")
     # signal, truth = sevent.stitched_waveforms()
     # sevent.training_waveform_windows(21)
     
@@ -377,18 +389,37 @@ if __name__ == "__main__":
     # --------------------------------
 
     # fig = plt.figure(figsize=(12, 5))
-    # fig.suptitle('Waveform PE event prediction')
+    # fig.suptitle('Concatenated sensor signals')
     # ax1 = plt.subplot(211)
-    # ax1.plot(signal, label='Sensor data')
+    # ax1.plot(np.array(signal) / 8.5, label='Sensor data')
     # ax1.set_ylabel('Amplitude')
     # ax1.legend()
     # ax2 = plt.subplot(212, sharex=ax1)
     # ax2.set_ylabel('Number of pe events')
     # ax2.plot(truth, label='Truth')
-    # # results = model.predict(sliced_data)
-    # # avg_results = signal_sense.reaggregate_windows_avg(results, window_size, window_size-1)
-    # # ax2.plot(avg_results, label='Prediction')
     # ax2.legend()
     # plt.xlabel('Sample index')
 
     # plt.show()
+    
+    # --------------------------------
+    # Pe distribution between limited by number of pe per simevent
+    # --------------------------------
+    
+    not_ditrib_dataset = load_dataset_from_file("./data/small_bin_data_not_distributed.cache.npz")
+    # load dataset from file
+    dataset = load_dataset_from_file("./data/small_bin_data_distributed_delayed.cache.npz")
+    dataset.shuffle()
+
+    pe_dist = dataset.get_truth_pe_distribution()
+    fig = plt.figure(figsize=(12, 8))
+    ax1 = plt.subplot(111)
+    ax1.bar([x - 0.2 for x in pe_dist.keys()], pe_dist.values(), 0.4, label='Uniform dataset')
+    ax1.set_yscale('log')
+    ax1.set_ylabel('Occurrences')
+    ax1.set_xlabel('Number of pe events')
+
+    not_distrib_pe_dist = not_ditrib_dataset.get_truth_pe_distribution()
+    ax1.bar([x + 0.2 for x in not_distrib_pe_dist.keys()], not_distrib_pe_dist.values(), 0.4, label='Non uniform dataset')
+    ax1.legend()
+    plt.show()

@@ -17,19 +17,23 @@
 
 La lumière Cherenkov est un phénomène physique similaire à un boom supersonique dans le domaine électromagnétique.
 Lorsque des particules chargées entrent dans notre atmosphère à la vitesse de la lumière, 
-elles démarrent une réaction en chaîne produisant une pluie de lumières atmosphérique.
-L’observation de ces pluies nous permet de mieux comprendre les mécanismes de la physique de particules. 
-Dans cette optique, l’UNIGE travaille sur la mission pionnière du satellite NUSES et du télescope spatial Terzina. 
-Ce télescope a pour but de détecter et d’étudier les neutrinos de manière indirecte en observant le limbe de la terre 
-et en y détectant des pluies de lumières atmosphériques de gamme d'énergie supérieure à 100PeV. 
-Le but principal de ce projet est d'aider à pallier le problème technique de la bande passante disponible. 
-À cause de ressources limitées à bord du satellite, Terzina n’aura qu'accès à 40 Gbit de transmission par jour et cela ne suffirait 
-pas à transmettre tous les évènements détectés en une journée. La solution imaginée est de créer un réseau de neurones
-capable d'aider à la décision d'évènements d'intérêt. Il a aussi été imaginé d'utiliser ce même réseau neuronal
-pour compenser la dégradation des capteurs à bord. Lors de ce travail j'ai commencé par prendre en main les différents
-simulateurs de données existants suivi de recherches pour comprendre le phénomène physique. 
-Ensuite, j'ai utilisé ces simulateurs pour tester des réseaux de neurones convolutifs. 
-Et pour finir j'ai établi une liste de tâches restantes pour prouver l'efficacité et l'utilité d'un tel réseau de neurones.
+elles entament une réaction en chaîne qui produit une pluie de lumière atmosphérique.
+L’observation de ces pluies nous permet de mieux comprendre les mécanismes de la physique des particules. 
+Dans cette optique, l’UNIGE travaille sur la mission pionnière du télescope spatial Terzina. 
+Ce télescope a pour but de détecter et d’étudier les neutrinos de manière indirecte en observant le limbe de la Terre 
+et en y détectant des pluies de lumière atmosphérique. Lors de sa conception, il s'est avéré 
+que le télescope recueillera plus de données qu'il sera capable de transmettre au sol.
+% En effet, Terzina n’aura accès qu'à 40 Gbit de transmission par jour.
+Le but initial de ce projet consistait à créer un modèle de réseau de neurones embarquable à bord du satellite,
+afin de réduire l'utilisation de la bande passante, pour cela le réseau neuronal effectuera un analyse des données des capteurs
+afin de détecter la quantité de photons provenant d'une pluie atmosphérique et aider à cibler des événements plus impactants.  
+Suite à des délais de production de certains composants essentiels au fonctionnement du réseau neuronal à bord du satellite,
+le projet a été adapté pour des télescopes au sol. Ceux-ci rencontrent des problèmes similaires de haute utilisation 
+de stockage, de resources de calcul à cause de la quantité astronomique de données recueillies.
+Un réseau de neurones similaire pourrait donc leur être utile.
+Lors de ce travail, j'ai commencé par étudier le phénomène physique et le fonctionnement des capteurs. 
+J'ai ensuite pris en main prendre en main les différents simulateurs de données. 
+Avec ces données, j'ai testé différentes architectures de réseau neuronaux pour trouver un modèle performant.
 
 \vfill
 \begin{center}

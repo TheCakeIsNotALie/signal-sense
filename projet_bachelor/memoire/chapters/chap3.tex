@@ -165,33 +165,47 @@ Ceci résulte en général en une perte de précision des données lors de la co
 
 \subsection{Couches}
 Les configurations vues jusqu'à maintenant peuvent aussi être combinées entre elles pour former de plus grand réseaux de neurones.
-Les réseaux neuronaux peuvent donc avoir une partie de réseau CNN et RNN, etc. Chacune des couche peut ainsi être catégorisée par
+Les réseaux neuronaux peuvent donc avoir une partie de réseau \gls{cnn} et \gls{rnn}, etc. Chacune des couche peut ainsi être catégorisée par
 rapport à sont utilité.
 Il existe aussi plus de couches spécifiques capables de travail spécifique. En voici plusieurs utilisées au cours de ce travail ainsi que leur utilité :
 
-\subsubsection{BatchNormalisation}
-La couche "BatchNormalisation", en général utilisée en premier dans un réseau, sert à normaliser les données qui lui sont données.
-Cela sert à généraliser le reste du traitement du réseau, par exemple si l'on traitait des images avec des expositions différentes.
+\begin{enumerate}
+    \item BatchNormalisation 
+	La couche "BatchNormalisation", en général utilisée en premier dans un réseau, sert à normaliser les données qui lui sont données.
+	Cela sert à généraliser le reste du traitement du réseau, par exemple si l'on traitait des images avec des expositions différentes.
 
-\subsubsection{Flatten}
-Lors de l'utilisation de couches de convolution, il est possible d'en effectuer plusieurs en même temps et de les traiter parallèlement.
-On peut ensuite utiliser une couche "Flatten" pour rassembler ces données en une seule dimension.
+    \item Flatten
+	Lors de l'utilisation de couches de convolution, il est possible d'en effectuer plusieurs en même temps et de les traiter parallèlement.
+	On peut ensuite utiliser une couche "Flatten" pour rassembler ces données en une seule dimension.
 
-\subsubsection{Pooling}
-Ce type de couches dans un réseau neuronal permet de réduire le nombre de dimensions qui lui sont données en entrée.
-Ses utilités sont de réduire la quantité de calculs pour la suite du réseau et de diminuer l'overfitting lors de l'entraînement.
+    \item Pooling 
+    Ce type de couches dans un réseau neuronal permet de réduire le nombre de dimensions qui lui sont données en entrée.
+	Ses utilités sont de réduire la quantité de calculs pour la suite du réseau et de diminuer l'overfitting lors de l'entraînement.
 
-Les deux manières les plus communes pour effectuer un pooling est de garder la moyenne ou le maximum de chaque dimension :
+	Les deux manières les plus communes pour effectuer un pooling est de garder la moyenne ou le maximum de chaque dimension :
 
-\begin{figure}[tbph!]
-	\centering
-	\includegraphics[width=0.4\linewidth]{pooling_layers.jpeg}
-	\caption[Illustration du principe de Pooling]{Illustration du principe de Pooling. Source : \cite{PoolingImage}}
-\end{figure}
+	\begin{figure}[tbph!]
+		\centering
+		\includegraphics[width=0.4\linewidth]{pooling_layers.jpeg}
+		\caption[Illustration du principe de Pooling]{Illustration du principe de Pooling. Source : \cite{PoolingImage}}
+	\end{figure}
 
-\subsubsection{Dropout}
-Cette couche a la même utilité que le Pooling, en réduisant le nombre d'entrées qui sont passés à la suite du réseau afin d'en diminuer l'overfitting.
-Cependant, ici, seul un pourcentage des noeuds seront gardés au lieu de transformer les dimensions du réseau.
+    \item Dropout
+	Cette couche a la même utilité que le Pooling, en réduisant le nombre d'entrées qui sont passés à la suite du réseau afin d'en diminuer l'overfitting.
+	Cependant, ici, seul un pourcentage des noeuds seront gardés au lieu de transformer les dimensions du réseau.
+\end{enumerate}
+
+% \subsubsection{BatchNormalisation}
+
+
+% \subsubsection{Flatten}
+
+
+% \subsubsection{Pooling}
+
+
+% \subsubsection{Dropout}
+
 
 \section{Données}
 

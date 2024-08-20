@@ -1,36 +1,31 @@
 % !TeX spellcheck = fr_FR
 \chapter*{Conclusion}
 
-
-Choses qui auraient pû être mieux faites :
-Tester des réseaux de neurones sur des datasets fixes (fait sur la fin mais le faire depuis le début)
-
-Améliorations possible :
-Minimiser le bruit électronique en incluant les 6 voisins dans l'estimation de \gls{pe}
-
-
-
 \addcontentsline{toc}{chapter}{Conclusion} % Adding toc entry
 
-Étant passionné par l'astronautique et intéressé 
-par tous les sujets adjacents tels que l'astrophysique ou même l'aéronautique, 
+Étant passionné par l'astronautique et intéressé par tous les sujets adjacents tels que l'astrophysique ou même l'aéronautique, 
 j'ai été ravi d'être choisi pour participer à un projet concret touchant à ces mêmes domaines.
 
-L'objectif de ce projet de semestre consistait à préparer le développement d'un modèle de réseau neuronal
-capable d'aider au tri d'évènements capturés par la caméra de Terzina. 
-Il s'est avéré au milieu du projet que les capacités techniques à bord du satellite ne seraient plus capable 
-de produire des données suffisantes pour le réseau neuronal envisagé, mais les résultats préliminaires du projet ont permis 
-à l'équipe de l'\gls{unige} de voir un potentiel dans la réutilisation d'un tel modèle dans des télescopes \gls{iact} terrestres.
+Pour rappel, l'objectif de ce projet de bachelor consistait à trouver un modèle de réseau neuronal capable d'interpréter 
+le contenu de signaux produits par des télescopes afin d'identifier les possibles photons provenant de pluies atmosphériques Cherenkov.
+Le modèle trouvé aurait servi à deux usages : le premier à réduire le stockage et le traitement des données en participant 
+au tri d'événements scientifiquement intéressants, le deuxième à possiblement améliorer les performances d'analyse de plus haut niveau 
+en filtrant le bruit contenu dans les signaux. 
 
-La première étape de ce travail a été de comprendre le phénomène physique
-de la lumière Cherenkov. Cette étape de découverte m'a grandement plu car pendant mes recherches sur le sujet,
-j'ai redécouvert des sujets dont j'avais déjà entendus parler et ai pu en approfondir mes connaissances.
+Pour réaliser ce projet, j'ai d'abord dû appréhender le phénomène physique de la radiation Cherenkov et ses implications pour le domaine de l'astrophysique.
+Il m'a fallu aussi comprendre le fonctionnement des différents télescopes existants et futurs afin de discerner 
+ce qui était attendu de ce projet. J'y ai appliqué les bases en machine learning que j'ai appris lors de mon cursus, et ai 
+réussi à éviter plusieurs pièges du domaine. J'ai aussi dû prendre en main plusieurs outils simulant des données scientifiques et les adapter
+pour entraîner des modèles de machine learning. Malgré les diverses techniques de machine learning essayées,
+aucun des modèles testé n'a présenté des performances permettant d'être intégré au sein d'autres projets comme imaginé.
 
-Dans un deuxième temps, j'ai dû comprendre et faire fonctionner des projets existants pour générer les données 
-sur lesquelles baser mes essais de réseau de neurones.
-Lors de mes premiers essais, j'ai rapidement rencontré les différents cas bloquants vus dans mes cours de machine learning,
-notamment les problèmes liés aux format et à la composition des données d'entrée.
+Cependant, le projet n'est pas encore considéré comme impossible. Il reste encore des techniques de machine learning plus complexes a investiguer. 
+Et si mon soupçon évoqué au chapitre précédent, que les données ne contiennent pas assez de détails, il est envisageable d'observer
+les données d'une manière différente pour minimiser les effets de bruits. Il se pourrait aussi qu'il n'est juste pas possible de détecter
+des évènements de très basse énergie en dessous d'un nombre spécifique de \gls{pe}.
 
-Ces différentes étapes m'ont permis d'établir une liste des tâches et de fonctionnalités nécessaires au projet final.
-Mon projet de bachelor sera donc d'établir des métriques de performance et une série de tests pour pouvoir comparer efficacement 
-les prochains modèles qui seront étudiés lors de la suite de ce projet afin de trouver un ou plusieurs modèle adapté aux attentes de l'équipe de l'UNIGE.
+Dans l'ensemble, je suis satisfait du travail que j'ai pû fournir au cours de ces derniers mois.
+Grâce à cette expérience, j'ai pu améliorer mes connaissances en machine learning et en recherches scientifiques.
+Dans un monde se tournant de plus en plus vers les intelligences artificielles et le machine learning,
+il est certain que les apprentissages et les conclusions que j'ai acquis au cours de ce travail me seront d'une 
+grande utilité durant toute ma carrière professionnelle.
