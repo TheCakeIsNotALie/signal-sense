@@ -170,15 +170,18 @@ rapport à sont utilité.
 Il existe aussi plus de couches spécifiques capables de travail spécifique. En voici plusieurs utilisées au cours de ce travail ainsi que leur utilité :
 
 \begin{enumerate}
-    \item BatchNormalisation 
+    \item \textbf{BatchNormalisation}
+
 	La couche "BatchNormalisation", en général utilisée en premier dans un réseau, sert à normaliser les données qui lui sont données.
 	Cela sert à généraliser le reste du traitement du réseau, par exemple si l'on traitait des images avec des expositions différentes.
 
-    \item Flatten
+    \item \textbf{Flatten}
+
 	Lors de l'utilisation de couches de convolution, il est possible d'en effectuer plusieurs en même temps et de les traiter parallèlement.
 	On peut ensuite utiliser une couche "Flatten" pour rassembler ces données en une seule dimension.
 
-    \item Pooling 
+    \item \textbf{Pooling}
+
     Ce type de couches dans un réseau neuronal permet de réduire le nombre de dimensions qui lui sont données en entrée.
 	Ses utilités sont de réduire la quantité de calculs pour la suite du réseau et de diminuer l'overfitting lors de l'entraînement.
 
@@ -190,22 +193,11 @@ Il existe aussi plus de couches spécifiques capables de travail spécifique. En
 		\caption[Illustration du principe de Pooling]{Illustration du principe de Pooling. Source : \cite{PoolingImage}}
 	\end{figure}
 
-    \item Dropout
+    \item \textbf{Dropout}
+    
 	Cette couche a la même utilité que le Pooling, en réduisant le nombre d'entrées qui sont passés à la suite du réseau afin d'en diminuer l'overfitting.
 	Cependant, ici, seul un pourcentage des noeuds seront gardés au lieu de transformer les dimensions du réseau.
 \end{enumerate}
-
-% \subsubsection{BatchNormalisation}
-
-
-% \subsubsection{Flatten}
-
-
-% \subsubsection{Pooling}
-
-
-% \subsubsection{Dropout}
-
 
 \section{Données}
 

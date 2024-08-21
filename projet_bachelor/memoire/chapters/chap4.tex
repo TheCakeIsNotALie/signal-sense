@@ -128,7 +128,7 @@ Celui-ci a immédiatement mieux performé que le précédent :
 
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=0.6\linewidth]{cnn_mult.drawio.png}
+	\includegraphics[width=0.8\linewidth]{cnn_mult.drawio.png}
 	\caption[Diagramme d'architecture du CNN à multiples sorties]{Diagramme d'architecture du CNN à multiples sorties.}
 \end{figure}
 
@@ -164,7 +164,7 @@ Avec ces métriques, le dernier modèle \gls{cnn} affiché est comparé avec le 
 \newpage
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{MetricsResults.png}
+	\includegraphics[width=1.2\linewidth,center]{MetricsResults.png}
 	\caption[Différence de métriques entre deux CNN]{Différence de métriques entre deux CNN (en rose le premier CNN à régression et en vert le meilleur CNN testé).}
 \end{figure}
 
@@ -192,7 +192,7 @@ J'ai alors créé une fonction calculant l'importance d'une fenêtre en fonction
 Malheureusement ces nouveaux poids ont eux l'effet inverse lors de l'entraînement des réseaux :
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{SampleWeightsTraining.png}
+	\includegraphics[width=1.1\linewidth,center]{SampleWeightsTraining.png}
 	\caption[Perte de performance en entraînant avec des Sample Weights]{Perte de performance en entraînant avec des Sample Weights (en orange/jaune deux réseaux CNN entraînés sans Sample Weights, en bleu un modèle entraîné avec Sample Weights).}
 \end{figure}
 
@@ -206,7 +206,7 @@ Pour essayer d'augmenter la précision ainsi que le Recall des derniers modèles
 \begin{figure}[tbph!]
 	\centering
 	\includegraphics[width=0.8\linewidth]{RnnDiagram.drawio.png}
-	\caption[Diagramme d'architecture du RNN simple]{Diagramme d'architecture du RNN simple (en rose et vert les CNN et en bleu le RNN simple).}
+	\caption[Diagramme d'architecture du RNN simple]{Diagramme d'architecture du RNN simple.}
 \end{figure}
 
 Dès les premiers cycles d'entraînement, ce modèle \gls{rnn} s'est directement départagé des autres en achevant
@@ -215,8 +215,8 @@ presque $~60\%$ et un Recall de $~70\%$ :
 \newpage
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{RNNTraining.png}
-	\caption[Comparaison des métriques entre CNN et RNN]{Comparaison des métriques entre CNN et RNN ()}
+	\includegraphics[width=1.2\linewidth,center]{RNNTraining.png}
+	\caption[Comparaison des métriques entre CNN et RNN]{Comparaison des métriques entre CNN et RNN (en rose et vert les CNN et en bleu le RNN simple).}
 \end{figure}
 
 \section{Fichiers de simulation Corsika}
@@ -261,9 +261,9 @@ En comparaison, les $1'000$ premières pluies sous forme de fichiers binaires pr
 Si l'on venait a stocker la totalité des événements d'un seul fichier ROOT en fichiers binaires,
 ceux-ci prendraient une taille de : $500'000/1000 * 2.38GB = 1.19TB$
 
+\newpage
 Cependant, la création de ces fichiers n'est que la première étape pour créer un jeu de données utilisable par nos réseaux de neurones.
 Les fichiers produits sont structurés de la manière suivante :
-
 \begin{figure}[tbph!]
 	\centering
 	\includegraphics[width=\linewidth]{Pyeventio_binary_file_content.drawio.png}
@@ -277,6 +277,7 @@ En premier, il faut convertir l'instant de l'impact en numéro d'échantillon en
 Puis, il faut vérifier si ce photon a bien été capturé pendant la durée du signal, car celui-ci peut avoir été détecté
 avant ou après l'événement, son temps d'impact peut donc être négatif ou supérieur à $75ns$, qui correspond la fin de la capture du signal.
 
+\newpage
 Au final, les données récupérées dans ces fichiers binaires sont similaires au premier simulateur :
 \begin{figure}[tbph!]
 	\centering
@@ -292,13 +293,14 @@ capteurs simulés.
 De plus, nous avons découvert que les temps d'impacts des photons détectés étaient un peu en avance par rapport
 au signal. Nous avons donc ajouté un délai de 2 échantillons lors du parsing du fichier, pour que les pics de vérité arrivent en 
 même temps ou avec un léger retard pour que le réseau de neurones puisse utiliser les échantillons précédents comme information utile.
-
+\newpage
 \begin{figure}[tbph!]
 	\centering
 	\includegraphics[width=\linewidth]{BinaryRecomposedSignalTruthNormalized.png}
 	\caption[Données Corsika normalisées]{Données Corsika normalisées.}
 \end{figure}
 
+\newpage
 \subsection{Création d'un dataset}
 Ici aussi, comme pour le simulateur "pe\_extractor", il a été nécessaire de créer un dataset à partir des données brutes.
 Cependant, pour ces fichiers de simulations, les signaux reconstitués à partir des fichiers binaires ne forment pas un seul long
@@ -316,14 +318,14 @@ Tous les signaux concaténés d'une pluie Cherenkov ressemblent à ceci :
 	\caption[Signaux concaténés de chaque capteur d'une pluie Cherenkov]{Signaux concaténés de chaque capteur d'une pluie Cherenkov.}
 \end{figure}
 
+\newpage
 Pour éviter ce problème, alors que les Sample Weights n'avaient pas l'air de donner de bons résultats précédemment,
 j'ai ajouté, lors de la création d'un dataset, une limite sur le nombre de fenêtres contenant un même nombre de \gls{pe}. 
 Afin d'éviter que ce ne soit toujours les $x$ premières fenêtres d'un événement qui soient sélectionnées, chaque fenêtre est choisie de manière aléatoire.
 Avec cette limitation, le dataset généré est beaucoup plus uniforme :
-\newpage
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{UniformDatasetDistributionComparaison.png}
+	\includegraphics[width=0.8\linewidth]{UniformDatasetDistributionComparaisonCrop.png}
 	\caption[Comparaison entre un dataset uniformisé et non uniformisé générés sur 100 pluies Cherenkov]{Comparaison entre un dataset uniformisé et non uniformisé générés sur 100 pluies Cherenkov.}
 \end{figure}
 
@@ -343,7 +345,7 @@ J'ai ensuite relancé des entraînements de zéro et ai observé les résultats 
 
 \begin{figure}[tbph!]
 	\centering
-	\includegraphics[width=\linewidth]{CorsikaTraining.png}
+	\includegraphics[width=1.2\linewidth,center]{CorsikaTraining.png}
 	\caption[Métriques d'entraînement des modèles sur les données Corsika]{Métriques d'entraînement des modèles sur les données Corsika.}
 \end{figure}
 
